@@ -1,0 +1,4 @@
+Flask
+openpyxl
+flask-cors
+gunicorn
