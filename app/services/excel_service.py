@@ -35,21 +35,22 @@ def procesar_excel(data):
     # Llamar a la función que llena la tabla en la sección específica
     rellenar_tabla(ws, data)
 
-
     # Guardar el archivo modificado
     wb.save(OUTPUT_PATH)
+
+
+def obtener_rango_fusionado(hoja, celda):
+    # Verifica si una celda está fusionada y obtiene la celda superior izquierda
+    for merged_range in hoja.merged_cells.ranges:
+        if celda.coordinate in merged_range:
+            return merged_range, hoja.cell(merged_range.min_row, merged_range.min_col)
+    return None, celda
+
+
 
 def rellenar_formulario(ws, data):
     codigo = data.pop("Codigo", None)
     fecha_emision = data.pop("Fecha de Emision", None)
-
-    # Función para verificar si una celda está fusionada y obtener la celda superior izquierda
-    def obtener_rango_fusionado(hoja, celda):
-
-        for merged_range in hoja.merged_cells.ranges:
-            if celda.coordinate in merged_range:
-                return merged_range, hoja.cell(merged_range.min_row, merged_range.min_col)
-        return None, celda
 
     # Función para limpiar y normalizar el texto
     def normalizar_texto(texto):
@@ -209,14 +210,6 @@ def rellenar_tabla(ws, data):
 def rellenar_pie_tabla(ws, data):
     nombre_conductor = data.pop("Nombre del Conductor", None)
     observaciones = data.pop("OBSERVACIONES", None)
-
-    # Función para verificar si una celda está fusionada y obtener el rango fusionado
-    def obtener_rango_fusionado(hoja, celda):
-
-        for merged_range in hoja.merged_cells.ranges:
-            if celda.coordinate in merged_range:
-                return merged_range, hoja.cell(merged_range.min_row, merged_range.min_col)
-        return None, celda
 
     # Llenar el nombre del conductor en la celda anterior
     if nombre_conductor:
