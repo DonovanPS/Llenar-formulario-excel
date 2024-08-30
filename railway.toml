@@ -1,0 +1,3 @@
+[service]
+name = "my-flask-api"
+start = "gunicorn app:app"
