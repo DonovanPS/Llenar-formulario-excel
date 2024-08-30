@@ -6,7 +6,7 @@ def create_app():
     CORS(app)
 
     # Registrar Blueprints
-    from app.routes.excel_routes import excel_blueprint
+    from myapp.routes.excel_routes import excel_blueprint
     app.register_blueprint(excel_blueprint)
 
     return app

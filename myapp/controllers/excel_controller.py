@@ -1,6 +1,6 @@
 import os
 from flask import send_file
-from app.services.excel_service import procesar_excel
+from myapp.services.excel_service import procesar_excel
 
 OUTPUT_PATH = os.path.join(os.getcwd(), 'plantilla_modificada.xlsx')
 
