@@ -291,23 +291,34 @@ def insertar_imagenes(ws, imagenes_data):
         'LOGO': 'A1'
     }
 
+    def obtener_rango_fusionado(hoja, celda_coord):
+        for rango in hoja.merged_cells.ranges:
+            if celda_coord in rango:
+                return rango
+        return None
+
     for tipo_imagen, url in imagenes_data.items():
         if url and tipo_imagen in celdas_imagenes:
-            celda = celdas_imagenes[tipo_imagen]
+            celda_coord = celdas_imagenes[tipo_imagen]
             try:
                 response = requests.get(url)
                 response.raise_for_status()
                 img_data = BytesIO(response.content)
                 
-                # Obtener el tamaño de la celda en píxeles
-                column_letter = celda[0]
-                row_number = int(celda[1:])
-                column_width = ws.column_dimensions[column_letter].width
-                row_height = ws.row_dimensions[row_number].height
+                # Obtener el rango fusionado si existe
+                rango_fusionado = obtener_rango_fusionado(ws, celda_coord)
                 
-                # Convertir unidades de Excel a píxeles (aproximadamente)
-                width_px = column_width * 7  # 1 unidad de ancho ≈ 7 píxeles
-                height_px = row_height * 1.5  # 1 unidad de alto ≈ 1.5 píxeles
+                if rango_fusionado:
+                    # Usar el rango fusionado para calcular el tamaño
+                    min_col, min_row, max_col, max_row = rango_fusionado.bounds
+                    width_px = sum(ws.column_dimensions[ws.cell(row=min_row, column=col).column_letter].width for col in range(min_col, max_col + 1)) * 7
+                    height_px = sum(ws.row_dimensions[row].height for row in range(min_row, max_row + 1)) * 1.5
+                else:
+                    # Si no está fusionada, usar el tamaño de la celda individual
+                    column_letter = celda_coord[0]
+                    row_number = int(celda_coord[1:])
+                    width_px = ws.column_dimensions[column_letter].width * 7
+                    height_px = ws.row_dimensions[row_number].height * 1.5
                 
                 # Usar Pillow para abrir y redimensionar la imagen
                 pil_image = Image.open(img_data)
@@ -320,7 +331,7 @@ def insertar_imagenes(ws, imagenes_data):
                 
                 pil_image = pil_image.resize((new_width, new_height), Image.LANCZOS)
                 
-                # Crear una nueva imagen con el tamaño de la celda y pegar la imagen redimensionada en el centro
+                # Crear una nueva imagen con el tamaño de la celda/rango fusionado y pegar la imagen redimensionada en el centro
                 new_image = Image.new('RGBA', (int(width_px), int(height_px)), (255, 255, 255, 0))
                 paste_x = (int(width_px) - new_width) // 2
                 paste_y = (int(height_px) - new_height) // 2
@@ -334,12 +345,12 @@ def insertar_imagenes(ws, imagenes_data):
                 # Crear la imagen de openpyxl
                 img = XLImage(img_final)
                 
-                # Ajustar el tamaño de la imagen al tamaño de la celda
+                # Ajustar el tamaño de la imagen al tamaño de la celda/rango fusionado
                 img.width = width_px
                 img.height = height_px
                 
                 # Añadir la imagen a la hoja de cálculo
-                ws.add_image(img, celda)
-                print(f"Imagen {tipo_imagen} insertada correctamente en la celda {celda}")
+                ws.add_image(img, celda_coord)
+                print(f"Imagen {tipo_imagen} insertada correctamente en la celda/rango {celda_coord}")
             except Exception as e:
                 print(f"Error al insertar la imagen {tipo_imagen}: {e}")
