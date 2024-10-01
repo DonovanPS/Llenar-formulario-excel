@@ -1,9 +1,10 @@
 from io import BytesIO
-from tkinter import Image
 from openpyxl import load_workbook
+import openpyxl
 from openpyxl.styles import Font
+from openpyxl.drawing.image import Image as XLImage
+from PIL import Image
 import os
-
 import requests
 
 # Construir la ruta relativa desde el directorio actual de ejecución
@@ -295,27 +296,50 @@ def insertar_imagenes(ws, imagenes_data):
             celda = celdas_imagenes[tipo_imagen]
             try:
                 response = requests.get(url)
-                response.raise_for_status()  # Lanza una excepción para códigos de estado HTTP no exitosos
-                img = Image(BytesIO(response.content))
-
-                celda_obj = ws[celda]
-                ancho_celda = ws.column_dimensions[celda[0]].width
-                alto_celda = ws.row_dimensions[int(celda[1:])].height
-
-                ancho_px = ancho_celda * 7
-                alto_px = alto_celda * 1.5
-
-                img.width, img.height = ajustar_imagen(img.width, img.height, ancho_px, alto_px)
-
+                response.raise_for_status()
+                img_data = BytesIO(response.content)
+                
+                # Obtener el tamaño de la celda en píxeles
+                column_letter = celda[0]
+                row_number = int(celda[1:])
+                column_width = ws.column_dimensions[column_letter].width
+                row_height = ws.row_dimensions[row_number].height
+                
+                # Convertir unidades de Excel a píxeles (aproximadamente)
+                width_px = column_width * 7  # 1 unidad de ancho ≈ 7 píxeles
+                height_px = row_height * 1.5  # 1 unidad de alto ≈ 1.5 píxeles
+                
+                # Usar Pillow para abrir y redimensionar la imagen
+                pil_image = Image.open(img_data)
+                
+                # Calcular las nuevas dimensiones manteniendo la proporción
+                img_width, img_height = pil_image.size
+                ratio = min(width_px / img_width, height_px / img_height)
+                new_width = int(img_width * ratio)
+                new_height = int(img_height * ratio)
+                
+                pil_image = pil_image.resize((new_width, new_height), Image.LANCZOS)
+                
+                # Crear una nueva imagen con el tamaño de la celda y pegar la imagen redimensionada en el centro
+                new_image = Image.new('RGBA', (int(width_px), int(height_px)), (255, 255, 255, 0))
+                paste_x = (int(width_px) - new_width) // 2
+                paste_y = (int(height_px) - new_height) // 2
+                new_image.paste(pil_image, (paste_x, paste_y))
+                
+                # Guardar la imagen final en un nuevo BytesIO
+                img_final = BytesIO()
+                new_image.save(img_final, format='PNG')
+                img_final.seek(0)
+                
+                # Crear la imagen de openpyxl
+                img = XLImage(img_final)
+                
+                # Ajustar el tamaño de la imagen al tamaño de la celda
+                img.width = width_px
+                img.height = height_px
+                
+                # Añadir la imagen a la hoja de cálculo
                 ws.add_image(img, celda)
                 print(f"Imagen {tipo_imagen} insertada correctamente en la celda {celda}")
-            except requests.RequestException as e:
-                print(f"Error al descargar la imagen {tipo_imagen}: {e}")
             except Exception as e:
                 print(f"Error al insertar la imagen {tipo_imagen}: {e}")
-        else:
-            print(f"URL no proporcionada o tipo de imagen no reconocido para {tipo_imagen}")
-
-def ajustar_imagen(ancho_orig, alto_orig, ancho_max, alto_max):
-    ratio = min(ancho_max/ancho_orig, alto_max/alto_orig)
-    return int(ancho_orig*ratio), int(alto_orig*ratio)
