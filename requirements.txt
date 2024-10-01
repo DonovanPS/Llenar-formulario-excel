@@ -1,5 +1,6 @@
 Flask
 openpyxl
 flask-cors
+requests
 gunicorn
 Pillow
