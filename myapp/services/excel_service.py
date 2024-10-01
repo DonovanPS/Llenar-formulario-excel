@@ -284,6 +284,12 @@ def rellenar_pie_tabla(ws, data):
         if not found:
             print("No se encontró una celda para 'OBSERVACIONES'.")
 
+def obtener_rango_fusionado(ws, celda):
+    for rango in ws.merged_cells.ranges:
+        if celda in rango:
+            return rango.bounds  # Retorna el rango completo si la celda está fusionada
+    return None
+
 def insertar_imagenes(ws, imagenes_data):
     celdas_imagenes = {
         'FIRMA_USER': 'B84',
@@ -291,66 +297,61 @@ def insertar_imagenes(ws, imagenes_data):
         'LOGO': 'A1'
     }
 
-    def obtener_rango_fusionado(hoja, celda_coord):
-        for rango in hoja.merged_cells.ranges:
-            if celda_coord in rango:
-                return rango
-        return None
-
     for tipo_imagen, url in imagenes_data.items():
         if url and tipo_imagen in celdas_imagenes:
-            celda_coord = celdas_imagenes[tipo_imagen]
+            celda = celdas_imagenes[tipo_imagen]
             try:
+                # Verifica si la celda está fusionada y obtiene el rango
+                rango_fusionado = obtener_rango_fusionado(ws, celda)
+
+                if rango_fusionado:
+                    # Si la celda está fusionada, usa el rango completo
+                    min_col, min_row, max_col, max_row = rango_fusionado
+                else:
+                    # Si no está fusionada, solo usa la celda individual
+                    min_col = ws[celda].column
+                    min_row = ws[celda].row
+                    max_col = min_col
+                    max_row = min_row
+
+                # Obtener el tamaño de las celdas involucradas
+                width_px = sum([ws.column_dimensions[ws.cell(row=min_row, column=col).column_letter].width for col in range(min_col, max_col + 1)]) * 7
+                height_px = sum([ws.row_dimensions[row].height for row in range(min_row, max_row + 1)]) * 1.5
+
+                # Descargar y redimensionar la imagen como antes
                 response = requests.get(url)
                 response.raise_for_status()
                 img_data = BytesIO(response.content)
-                
-                # Obtener el rango fusionado si existe
-                rango_fusionado = obtener_rango_fusionado(ws, celda_coord)
-                
-                if rango_fusionado:
-                    # Usar el rango fusionado para calcular el tamaño
-                    min_col, min_row, max_col, max_row = rango_fusionado.bounds
-                    width_px = sum(ws.column_dimensions[ws.cell(row=min_row, column=col).column_letter].width for col in range(min_col, max_col + 1)) * 7
-                    height_px = sum(ws.row_dimensions[row].height for row in range(min_row, max_row + 1)) * 1.5
-                else:
-                    # Si no está fusionada, usar el tamaño de la celda individual
-                    column_letter = celda_coord[0]
-                    row_number = int(celda_coord[1:])
-                    width_px = ws.column_dimensions[column_letter].width * 7
-                    height_px = ws.row_dimensions[row_number].height * 1.5
-                
-                # Usar Pillow para abrir y redimensionar la imagen
                 pil_image = Image.open(img_data)
-                
-                # Calcular las nuevas dimensiones manteniendo la proporción
+
+                # Redimensionar manteniendo la proporción
                 img_width, img_height = pil_image.size
                 ratio = min(width_px / img_width, height_px / img_height)
                 new_width = int(img_width * ratio)
                 new_height = int(img_height * ratio)
-                
+
                 pil_image = pil_image.resize((new_width, new_height), Image.LANCZOS)
-                
-                # Crear una nueva imagen con el tamaño de la celda/rango fusionado y pegar la imagen redimensionada en el centro
+
+                # Crear una nueva imagen del tamaño del rango fusionado
                 new_image = Image.new('RGBA', (int(width_px), int(height_px)), (255, 255, 255, 0))
                 paste_x = (int(width_px) - new_width) // 2
                 paste_y = (int(height_px) - new_height) // 2
                 new_image.paste(pil_image, (paste_x, paste_y))
-                
-                # Guardar la imagen final en un nuevo BytesIO
+
+                # Guardar la imagen final en BytesIO
                 img_final = BytesIO()
                 new_image.save(img_final, format='PNG')
                 img_final.seek(0)
-                
+
                 # Crear la imagen de openpyxl
                 img = XLImage(img_final)
-                
-                # Ajustar el tamaño de la imagen al tamaño de la celda/rango fusionado
+
+                # Ajustar el tamaño de la imagen
                 img.width = width_px
                 img.height = height_px
-                
-                # Añadir la imagen a la hoja de cálculo
-                ws.add_image(img, celda_coord)
-                print(f"Imagen {tipo_imagen} insertada correctamente en la celda/rango {celda_coord}")
+
+                # Insertar la imagen en la celda superior izquierda
+                ws.add_image(img, ws.cell(row=min_row, column=min_col).coordinate)
+                print(f"Imagen {tipo_imagen} insertada correctamente en {celda}")
             except Exception as e:
                 print(f"Error al insertar la imagen {tipo_imagen}: {e}")
