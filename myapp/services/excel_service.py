@@ -1,6 +1,10 @@
+from io import BytesIO
+from tkinter import Image
 from openpyxl import load_workbook
 from openpyxl.styles import Font
 import os
+
+import requests
 
 # Construir la ruta relativa desde el directorio actual de ejecución
 TEMPLATE_PATH = os.path.join(os.getcwd(), 'template', 'PREOPERACIONALES.xlsx')
@@ -24,6 +28,7 @@ def procesar_excel(data):
     # Extraer el objeto FORMULARIO del JSON y eliminarlo del objeto original
     formulario_data = data.pop('FORMULARIO', None)
     pie_tabla = data.pop("PIE_TABLA", None)
+    imagenes_data = data.pop("IMAGENES", {})
 
     # Llamar a la función que llena el formulario si existe
     if formulario_data:
@@ -31,6 +36,9 @@ def procesar_excel(data):
 
     if pie_tabla:
         rellenar_pie_tabla(ws, pie_tabla)
+
+    if imagenes_data:
+        insertar_imagenes(ws, imagenes_data)
 
     # Llamar a la función que llena la tabla en la sección específica
     rellenar_tabla(ws, data)
@@ -275,5 +283,39 @@ def rellenar_pie_tabla(ws, data):
         if not found:
             print("No se encontró una celda para 'OBSERVACIONES'.")
 
+def insertar_imagenes(ws, imagenes_data):
+    celdas_imagenes = {
+        'FIRMA_USER': 'B84',
+        'FIRMA_ENCARGADO': 'M84',
+        'LOGO': 'A1'
+    }
 
+    for tipo_imagen, url in imagenes_data.items():
+        if url and tipo_imagen in celdas_imagenes:
+            celda = celdas_imagenes[tipo_imagen]
+            try:
+                response = requests.get(url)
+                response.raise_for_status()  # Lanza una excepción para códigos de estado HTTP no exitosos
+                img = Image(BytesIO(response.content))
 
+                celda_obj = ws[celda]
+                ancho_celda = ws.column_dimensions[celda[0]].width
+                alto_celda = ws.row_dimensions[int(celda[1:])].height
+
+                ancho_px = ancho_celda * 7
+                alto_px = alto_celda * 1.5
+
+                img.width, img.height = ajustar_imagen(img.width, img.height, ancho_px, alto_px)
+
+                ws.add_image(img, celda)
+                print(f"Imagen {tipo_imagen} insertada correctamente en la celda {celda}")
+            except requests.RequestException as e:
+                print(f"Error al descargar la imagen {tipo_imagen}: {e}")
+            except Exception as e:
+                print(f"Error al insertar la imagen {tipo_imagen}: {e}")
+        else:
+            print(f"URL no proporcionada o tipo de imagen no reconocido para {tipo_imagen}")
+
+def ajustar_imagen(ancho_orig, alto_orig, ancho_max, alto_max):
+    ratio = min(ancho_max/ancho_orig, alto_max/alto_orig)
+    return int(ancho_orig*ratio), int(alto_orig*ratio)
