@@ -295,7 +295,7 @@ def insertar_imagenes(ws, imagenes_data):
     tamanos_fijos = {
         'LOGO': (200, 100), 
         'FIRMA_USER': (150, 75),  
-        'FIRMA_ENCARGADO': (150, 75)
+        'FIRMA_ENCARGADO': (180, 105)
     }
 
     for tipo_imagen, url in imagenes_data.items():
