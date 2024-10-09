@@ -317,18 +317,19 @@ def insertar_imagenes(ws, imagenes_data):
           'U14', 'U15', 'U16', 'U17', 'U18', 'U19', 'U21', 'U22', 'U23', 'U24', 'U52', 'U53', 'U54'], 'T77')
     ]
 
+    # Obtener la URL de FIRMA_USER
+    firma_user_url = imagenes_data.get('FIRMA_USER')
+
     for tipo_imagen, url in imagenes_data.items():
-        if url:
-            if tipo_imagen in celdas_imagenes:
-                celda = celdas_imagenes[tipo_imagen]
-                insertar_imagen_en_celda(ws, url, celda, tamanos_fijos[tipo_imagen])
-            elif tipo_imagen == 'FIRMA-REP':
-                for celdas_verificar, celda_firma in grupos_celdas_firma_rep:
-                    if any(ws[celda].value for celda in celdas_verificar):
-                        insertar_imagen_en_celda(ws, url, celda_firma, tamanos_fijos[tipo_imagen])
-                        print(f"Firma insertada en {celda_firma} porque se encontró contenido en el grupo {celdas_verificar}")
-                    else:
-                        print(f"No se insertó firma en {celda_firma} porque no se encontró contenido en el grupo {celdas_verificar}")
+        if url and tipo_imagen in celdas_imagenes:
+            celda = celdas_imagenes[tipo_imagen]
+            insertar_imagen_en_celda(ws, url, celda, tamanos_fijos[tipo_imagen])
+        
+        elif tipo_imagen == 'FIRMA-REP' and firma_user_url:
+            for celdas_verificar, celda_firma in grupos_celdas_firma_rep:
+                if any(ws[celda].value for celda in celdas_verificar):
+                    insertar_imagen_en_celda(ws, firma_user_url, celda_firma, tamanos_fijos['FIRMA-REP'])
+                    print(f"Firma insertada en {celda_firma} porque se encontró contenido en el grupo {celdas_verificar}")
 
 def insertar_imagen_en_celda(ws, url, celda, tamano):
     try:
