@@ -38,11 +38,13 @@ def procesar_excel(data):
     if pie_tabla:
         rellenar_pie_tabla(ws, pie_tabla)
 
+    # Llamar a la función que llena la tabla en la sección específica
+    rellenar_tabla(ws, data)
+    
     if imagenes_data:
         insertar_imagenes(ws, imagenes_data)
 
-    # Llamar a la función que llena la tabla en la sección específica
-    rellenar_tabla(ws, data)
+    
 
     # Guardar el archivo modificado
     wb.save(OUTPUT_PATH)
