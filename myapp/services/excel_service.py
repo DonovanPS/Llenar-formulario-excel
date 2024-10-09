@@ -40,7 +40,7 @@ def procesar_excel(data):
 
     # Llamar a la función que llena la tabla en la sección específica
     rellenar_tabla(ws, data)
-    
+
     if imagenes_data:
         insertar_imagenes(ws, imagenes_data)
 
@@ -295,7 +295,7 @@ def insertar_imagenes(ws, imagenes_data):
 
     # Definir tamaños fijos para cada tipo de imagen (ancho, alto) en píxeles
     tamanos_fijos = {
-        'FIRMA_REP': (100, 50),
+        'FIRMA_REP': (115, 100),
         'LOGO': (200, 100), 
         'FIRMA_USER': (150, 75),  
         'FIRMA_ENCARGADO': (180, 105)
