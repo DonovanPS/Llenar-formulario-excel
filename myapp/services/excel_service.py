@@ -293,42 +293,65 @@ def insertar_imagenes(ws, imagenes_data):
 
     # Definir tamaños fijos para cada tipo de imagen (ancho, alto) en píxeles
     tamanos_fijos = {
+        'FIRMA-REP': (100, 50),
         'LOGO': (200, 100), 
         'FIRMA_USER': (150, 75),  
         'FIRMA_ENCARGADO': (180, 105)
     }
 
+    # Grupos de celdas para verificar y celdas donde insertar FIRMA-REP
+    grupos_celdas_firma_rep = [
+        (['H14', 'H15', 'H16', 'H17', 'H18', 'H19', 'H21', 'H22', 'H23', 'H24', 'H52', 'H53', 'H54', 
+          'I14', 'I15', 'I16', 'I17', 'I18', 'I19', 'I21', 'I22', 'I23', 'I24', 'I52', 'I53', 'I54'], 'H77'),
+        (['J14', 'J15', 'J16', 'J17', 'J18', 'J19', 'J21', 'J22', 'J23', 'J24', 'J52', 'J53', 'J54', 
+          'K14', 'K15', 'K16', 'K17', 'K18', 'K19', 'K21', 'K22', 'K23', 'K24', 'K52', 'K53', 'K54'], 'J77'),
+        (['L14', 'L15', 'L16', 'L17', 'L18', 'L19', 'L21', 'L22', 'L23', 'L24', 'L52', 'L53', 'L54', 
+          'M14', 'M15', 'M16', 'M17', 'M18', 'M19', 'M21', 'M22', 'M23', 'M24', 'M52', 'M53', 'M54'], 'L77'),
+        (['N14', 'N15', 'N16', 'N17', 'N18', 'N19', 'N21', 'N22', 'N23', 'N24', 'N52', 'N53', 'N54', 
+          'O14', 'O15', 'O16', 'O17', 'O18', 'O19', 'O21', 'O22', 'O23', 'O24', 'O52', 'O53', 'O54'], 'N77'),
+        (['P14', 'P15', 'P16', 'P17', 'P18', 'P19', 'P21', 'P22', 'P23', 'P24', 'P52', 'P53', 'P54', 
+          'Q14', 'Q15', 'Q16', 'Q17', 'Q18', 'Q19', 'Q21', 'Q22', 'Q23', 'Q24', 'Q52', 'Q53', 'Q54'], 'P77'),
+        (['R14', 'R15', 'R16', 'R17', 'R18', 'R19', 'R21', 'R22', 'R23', 'R24', 'R52', 'R53', 'R54', 
+          'S14', 'S15', 'S16', 'S17', 'S18', 'S19', 'S21', 'S22', 'S23', 'S24', 'S52', 'S53', 'S54'], 'R77'),
+        (['T14', 'T15', 'T16', 'T17', 'T18', 'T19', 'T21', 'T22', 'T23', 'T24', 'T52', 'T53', 'T54', 
+          'U14', 'U15', 'U16', 'U17', 'U18', 'U19', 'U21', 'U22', 'U23', 'U24', 'U52', 'U53', 'U54'], 'T77')
+    ]
+
     for tipo_imagen, url in imagenes_data.items():
-        if url and tipo_imagen in celdas_imagenes:
-            celda = celdas_imagenes[tipo_imagen]
-            try:
-                response = requests.get(url)
-                response.raise_for_status()
-                img_data = BytesIO(response.content)
-                
-                # Usar el tamaño fijo predefinido
-                width_px, height_px = tamanos_fijos[tipo_imagen]
-                
-                # Usar Pillow para abrir y redimensionar la imagen
-                pil_image = Image.open(img_data)
-                
-                # Redimensionar la imagen al tamaño fijo
-                pil_image = pil_image.resize((width_px, height_px), Image.LANCZOS)
-                
-                # Guardar la imagen redimensionada en un nuevo BytesIO
-                img_final = BytesIO()
-                pil_image.save(img_final, format='PNG')
-                img_final.seek(0)
-                
-                # Crear la imagen de openpyxl
-                img = XLImage(img_final)
-                
-                # Establecer el tamaño de la imagen
-                img.width = width_px
-                img.height = height_px
-                
-                # Añadir la imagen a la hoja de cálculo
-                ws.add_image(img, celda)
-                print(f"Imagen {tipo_imagen} insertada correctamente en la celda {celda}")
-            except Exception as e:
-                print(f"Error al insertar la imagen {tipo_imagen}: {e}")
+        if url:
+            if tipo_imagen in celdas_imagenes:
+                celda = celdas_imagenes[tipo_imagen]
+                insertar_imagen_en_celda(ws, url, celda, tamanos_fijos[tipo_imagen])
+            elif tipo_imagen == 'FIRMA-REP':
+                for celdas_verificar, celda_firma in grupos_celdas_firma_rep:
+                    if any(ws[celda].value for celda in celdas_verificar):
+                        insertar_imagen_en_celda(ws, url, celda_firma, tamanos_fijos[tipo_imagen])
+                        print(f"Firma insertada en {celda_firma} porque se encontró contenido en el grupo {celdas_verificar}")
+                    else:
+                        print(f"No se insertó firma en {celda_firma} porque no se encontró contenido en el grupo {celdas_verificar}")
+
+def insertar_imagen_en_celda(ws, url, celda, tamano):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        img_data = BytesIO(response.content)
+        
+        width_px, height_px = tamano
+        
+        pil_image = Image.open(img_data)
+        pil_image = pil_image.resize((width_px, height_px), Image.LANCZOS)
+        
+        img_final = BytesIO()
+        pil_image.save(img_final, format='PNG')
+        img_final.seek(0)
+        
+        img = XLImage(img_final)
+        img.width = width_px
+        img.height = height_px
+        
+        ws.add_image(img, celda)
+        print(f"Imagen insertada correctamente en la celda {celda}")
+    except Exception as e:
+        print(f"Error al insertar la imagen en la celda {celda}: {e}")
+
+# ... (resto del código sin cambios)
