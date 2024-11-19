@@ -193,7 +193,9 @@ def insertar_imagenes(ws, imagenes_data):
     if 'FIRMA_USER' in imagenes_data:
         for dia, (col_inicio, col_fin) in grupos_firma_user.items():
             if verificar_contenido_columna(col_inicio, col_fin):
-                celda_firma = f"{col_inicio}25"
+                # Calculamos la columna del medio
+                col_media = chr(ord(col_inicio) + 1)  # Avanzamos una letra para obtener la columna del medio
+                celda_firma = f"{col_media}25"
                 insertar_imagen_en_celda(ws, imagenes_data['FIRMA_USER'],
                                        celda_firma,
                                        tamanos_fijos['FIRMA_USER'])
