@@ -88,9 +88,9 @@ def procesar_excel_dinamico(data):
 
             # Asignar el valor correspondiente
             if valor_dia is True:
-                celda_principal.value = "✔️"
+                celda_principal.value = "OK"
             elif valor_dia is False:
-                celda_principal.value = "❌"
+                celda_principal.value = "X"
             else:
                 celda_principal.value = ""
 
@@ -161,20 +161,41 @@ def insertar_imagen_en_celda(ws, url, celda, tamano):
         response.raise_for_status()
         img_data = BytesIO(response.content)
         
-        width_px, height_px = tamano
-        
+        # Detectar el formato de la imagen
         pil_image = Image.open(img_data)
-        pil_image = pil_image.resize((width_px, height_px), Image.LANCZOS)
+        formato = pil_image.format.lower()
         
-        img_final = BytesIO()
-        pil_image.save(img_final, format='PNG')
-        img_final.seek(0)
+        # Verificar formato soportado
+        formatos_soportados = ['png', 'jpeg', 'jpg']
+        if formato not in formatos_soportados:
+            print(f"Warning: Formato de imagen {formato} no soportado. Convirtiendo a PNG...")
+            # Convertir a PNG
+            width_px, height_px = tamano
+            pil_image = pil_image.convert('RGBA')
+            pil_image = pil_image.resize((width_px, height_px), Image.LANCZOS)
+            
+            img_final = BytesIO()
+            pil_image.save(img_final, format='PNG')
+            img_final.seek(0)
+        else:
+            # Procesar normalmente
+            width_px, height_px = tamano
+            pil_image = pil_image.resize((width_px, height_px), Image.LANCZOS)
+            
+            img_final = BytesIO()
+            pil_image.save(img_final, format='PNG')
+            img_final.seek(0)
         
+        # Crear y configurar la imagen para Excel
         img = XLImage(img_final)
         img.width = width_px
         img.height = height_px
         
+        # Insertar la imagen
         ws.add_image(img, celda)
         print(f"Imagen insertada correctamente en la celda {celda}")
+        
     except Exception as e:
         print(f"Error al insertar la imagen en la celda {celda}: {e}")
+        # Continuar sin la imagen en caso de error
+        pass
