@@ -6,16 +6,42 @@ from openpyxl.styles import Font, Alignment
 from openpyxl.drawing.image import Image as XLImage
 import requests
 from io import BytesIO
+import logging
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def get_template_path():
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     return os.path.join(base_dir, 'template', 'LIMPIEZA.xlsx')
 
+def validar_datos_inspeccion(inspeccion_data):
+    """Valida la estructura y valores de los datos de inspección"""
+    logger.info("Validando datos de inspección")
+    
+    for elemento, dias in inspeccion_data.items():
+        logger.info(f"Validando elemento: {elemento}")
+        
+        if not isinstance(dias, dict):
+            logger.error(f"Error: valores para {elemento} no es un diccionario")
+            return False
+            
+        for dia, valor in dias.items():
+            if not isinstance(valor, bool) and valor is not None:
+                logger.error(f"Error: valor inválido para {elemento} en {dia}: {valor}")
+                return False
+                
+            logger.info(f"Valor válido para {elemento} en {dia}: {valor}")
+    
+    return True
+
 def procesar_excel_dinamico(data):
     """
     Procesa la plantilla Excel y llena las celdas según la data recibida.
     """
-    # Cargar el archivo de plantilla
+    logger.info("Iniciando procesamiento de Excel dinámico")
+    
     wb = load_workbook(get_template_path())
     worksheet = wb.active
 
@@ -71,28 +97,45 @@ def procesar_excel_dinamico(data):
 
     # Obtener la data de inspección
     inspeccion = data.get("INSPECCION", {})
-    fila_inicial = 11  # La fila donde comienza el primer elemento
+    logger.info(f"Datos de inspección recibidos: {inspeccion}")
 
+    fila_inicial = 11
+    
     # Iterar sobre los elementos en el JSON
     for idx, (nombre_elemento, valores_dias) in enumerate(inspeccion.items()):
         fila_actual = fila_inicial + idx
+        logger.info(f"Procesando elemento: {nombre_elemento} en fila {fila_actual}")
 
         # Iterar por cada día
         for dia, (col_inicio, col_fin) in dias_columnas.items():
             # Obtener la celda y verificar si está fusionada
             celda_destino = worksheet[f"{col_inicio}{fila_actual}"]
             celda_principal = obtener_celda_principal(worksheet, celda_destino)
-
+            
             # Verificar el valor del día para el elemento actual
             valor_dia = valores_dias.get(dia.lower())
+            
+            logger.info(f"Procesando día {dia} para {nombre_elemento}: valor={valor_dia}, celda={celda_principal.coordinate}")
 
             # Asignar el valor correspondiente
-            if valor_dia is True:
-                celda_principal.value = "OK"
-            elif valor_dia is False:
-                celda_principal.value = "X"
-            else:
-                celda_principal.value = ""
+            try:
+                if valor_dia is True:
+                    celda_principal.value = "OK"
+                    logger.info(f"Marcado OK en celda {celda_principal.coordinate}")
+                elif valor_dia is False:
+                    celda_principal.value = "X"
+                    logger.info(f"Marcado X en celda {celda_principal.coordinate}")
+                else:
+                    celda_principal.value = ""
+                    logger.info(f"Celda {celda_principal.coordinate} dejada en blanco")
+                
+                # Verificar que el valor se estableció correctamente
+                logger.info(f"Valor final en celda {celda_principal.coordinate}: {celda_principal.value}")
+                
+            except Exception as e:
+                logger.error(f"Error al establecer valor en celda {celda_principal.coordinate}: {str(e)}")
+
+    logger.info("Procesamiento de inspección completado")
 
     # Procesar imágenes si existen
     if 'IMAGENES' in data:
