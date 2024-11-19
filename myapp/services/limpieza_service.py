@@ -47,13 +47,13 @@ def procesar_excel_dinamico(data):
 
     # Configuración base de columnas
     dias_columnas = {
-        "lunes": ("E", "G"),
-        "martes": ("H", "J"),
-        "miércoles": ("K", "M"),
-        "jueves": ("N", "P"),
-        "viernes": ("Q", "S"),
-        "sábado": ("T", "V"),
-        "domingo": ("W", "Y")
+        "Lunes": ("E", "G"),
+        "Martes": ("H", "J"),
+        "Miercoles": ("K", "M"),
+        "Jueves": ("N", "P"),
+        "Viernes": ("Q", "S"),
+        "Sabado": ("T", "V"),
+        "Domingo": ("W", "Y")
     }
 
     # Estilo para las celdas del formulario
@@ -113,7 +113,7 @@ def procesar_excel_dinamico(data):
             celda_principal = obtener_celda_principal(worksheet, celda_destino)
             
             # Verificar el valor del día para el elemento actual
-            valor_dia = valores_dias.get(dia.lower())
+            valor_dia = valores_dias.get(dia)
             
             logger.info(f"Procesando día {dia} para {nombre_elemento}: valor={valor_dia}, celda={celda_principal.coordinate}")
 
