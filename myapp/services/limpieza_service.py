@@ -56,24 +56,11 @@ def procesar_excel_dinamico(data):
         "Domingo": ("W", "Y")
     }
 
-    # Definir estilos para el formulario
+    # Estilo para las celdas del formulario
     estilo_formulario = {
         'font': Font(
             name='Arial',
-            size=12,
-            bold=True
-        ),
-        'alignment': Alignment(
-            horizontal='center',
-            vertical='center'
-        )
-    }
-
-    # Definir estilos para los checks
-    estilo_check = {
-        'font': Font(
-            name='Segoe UI Emoji',
-            size=20,
+            size=16,
             bold=True
         ),
         'alignment': Alignment(
@@ -133,23 +120,18 @@ def procesar_excel_dinamico(data):
             # Asignar el valor correspondiente
             try:
                 if valor_dia is True:
-                    celda_principal.value = "✔️"
-                    # Aplicar estilos
-                    celda_principal.font = estilo_check['font']
-                    celda_principal.alignment = estilo_check['alignment']
-                    logger.info(f"Marcado ✔️ en celda {celda_principal.coordinate}")
+                    celda_principal.value = "✔"
+                    celda_principal.font = Font(name='Segoe UI Symbol', size=14, bold=True)
+                    celda_principal.alignment = Alignment(horizontal='center', vertical='center')
                 elif valor_dia is False:
                     celda_principal.value = "❌"
-                    # Aplicar estilos
-                    celda_principal.font = estilo_check['font']
-                    celda_principal.alignment = estilo_check['alignment']
-                    logger.info(f"Marcado ❌ en celda {celda_principal.coordinate}")
+                    celda_principal.font = Font(name='Segoe UI Symbol', size=14, bold=True)
+                    celda_principal.alignment = Alignment(horizontal='center', vertical='center')
                 else:
                     celda_principal.value = ""
-                    logger.info(f"Celda {celda_principal.coordinate} dejada en blanco")
-                
-                # Ajustar altura de la fila para acomodar el símbolo más grande
-                worksheet.row_dimensions[fila_actual].height = 25  # Ajusta este valor según necesites
+                    
+                # Verificar que el valor se estableció correctamente
+                logger.info(f"Valor final en celda {celda_principal.coordinate}: {celda_principal.value}")
                 
             except Exception as e:
                 logger.error(f"Error al establecer valor en celda {celda_principal.coordinate}: {str(e)}")
