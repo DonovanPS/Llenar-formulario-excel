@@ -11,7 +11,7 @@ def get_template_path():
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     return os.path.join(base_dir, 'template', 'LIMPIEZA.xlsx')
 
-def procesar_excel(data):
+def procesar_excel_dinamico(data):
     """
     Procesa la plantilla Excel y llena las celdas según la data recibida.
     """
