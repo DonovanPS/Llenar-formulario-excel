@@ -56,11 +56,24 @@ def procesar_excel_dinamico(data):
         "Domingo": ("W", "Y")
     }
 
-    # Estilo para las celdas del formulario
+    # Definir estilos para el formulario
     estilo_formulario = {
         'font': Font(
             name='Arial',
             size=12,
+            bold=True
+        ),
+        'alignment': Alignment(
+            horizontal='center',
+            vertical='center'
+        )
+    }
+
+    # Definir estilos para los checks
+    estilo_check = {
+        'font': Font(
+            name='Segoe UI Emoji',
+            size=20,
             bold=True
         ),
         'alignment': Alignment(
@@ -120,17 +133,23 @@ def procesar_excel_dinamico(data):
             # Asignar el valor correspondiente
             try:
                 if valor_dia is True:
-                    celda_principal.value = "OK"
-                    logger.info(f"Marcado OK en celda {celda_principal.coordinate}")
+                    celda_principal.value = "✔️"
+                    # Aplicar estilos
+                    celda_principal.font = estilo_check['font']
+                    celda_principal.alignment = estilo_check['alignment']
+                    logger.info(f"Marcado ✔️ en celda {celda_principal.coordinate}")
                 elif valor_dia is False:
-                    celda_principal.value = "X"
-                    logger.info(f"Marcado X en celda {celda_principal.coordinate}")
+                    celda_principal.value = "❌"
+                    # Aplicar estilos
+                    celda_principal.font = estilo_check['font']
+                    celda_principal.alignment = estilo_check['alignment']
+                    logger.info(f"Marcado ❌ en celda {celda_principal.coordinate}")
                 else:
                     celda_principal.value = ""
                     logger.info(f"Celda {celda_principal.coordinate} dejada en blanco")
                 
-                # Verificar que el valor se estableció correctamente
-                logger.info(f"Valor final en celda {celda_principal.coordinate}: {celda_principal.value}")
+                # Ajustar altura de la fila para acomodar el símbolo más grande
+                worksheet.row_dimensions[fila_actual].height = 25  # Ajusta este valor según necesites
                 
             except Exception as e:
                 logger.error(f"Error al establecer valor en celda {celda_principal.coordinate}: {str(e)}")
@@ -159,7 +178,7 @@ def insertar_imagenes(ws, imagenes_data):
     # Tamaños fijos para cada tipo de imagen
     tamanos_fijos = {
         'LOGO': (200, 100),
-        'FIRMA_USER': (150, 75)
+        'FIRMA_USER': (200, 115)
     }
 
     # Grupos de celdas para verificar firma por día
