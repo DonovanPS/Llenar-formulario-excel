@@ -121,11 +121,11 @@ def procesar_excel_dinamico(data):
             try:
                 if valor_dia is True:
                     celda_principal.value = "✔"
-                    celda_principal.font = Font(name='Segoe UI Symbol', size=14, bold=True)
+                    celda_principal.font = Font(name='Segoe UI Symbol', size=22, bold=True)
                     celda_principal.alignment = Alignment(horizontal='center', vertical='center')
                 elif valor_dia is False:
                     celda_principal.value = "❌"
-                    celda_principal.font = Font(name='Segoe UI Symbol', size=14, bold=True)
+                    celda_principal.font = Font(name='Segoe UI Symbol', size=22, bold=True)
                     celda_principal.alignment = Alignment(horizontal='center', vertical='center')
                 else:
                     celda_principal.value = ""
