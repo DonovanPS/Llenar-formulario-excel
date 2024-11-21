@@ -40,12 +40,12 @@ def procesar_excel_dinamico(data):
     """
     Procesa la plantilla Excel y llena las celdas según la data recibida.
     """
-    logger.info("Iniciando procesamiento de Excel dinámico")
+    logger.info("==================== INICIO PROCESAMIENTO ====================")
+    logger.info(f"Data completa recibida: {data}")
     
     wb = load_workbook(get_template_path())
     worksheet = wb.active
 
-    # Configuración base de columnas
     dias_columnas = {
         "lunes": ("E", "G"),
         "martes": ("H", "J"),
@@ -96,47 +96,58 @@ def procesar_excel_dinamico(data):
                 cell.alignment = estilo_formulario['alignment']
 
     # Obtener la data de inspección
-    inspeccion = data.get("INSPECCION", {})
-    logger.info(f"Datos de inspección recibidos: {inspeccion}")
+    inspeccion = data.get("inspecciones", {})
+    logger.info(f"Estructura de inspecciones: {type(inspeccion)}")
+    logger.info(f"Contenido de inspecciones: {inspeccion}")
 
     fila_inicial = 11
     
     # Iterar sobre los elementos en el JSON
     for idx, (nombre_elemento, valores_dias) in enumerate(inspeccion.items()):
         fila_actual = fila_inicial + idx
-        logger.info(f"Procesando elemento: {nombre_elemento} en fila {fila_actual}")
+        logger.info(f"\n=== Procesando elemento: {nombre_elemento} ===")
+        logger.info(f"Tipo de valores_dias: {type(valores_dias)}")
+        logger.info(f"Contenido de valores_dias: {valores_dias}")
+        logger.info(f"Fila actual: {fila_actual}")
 
         # Iterar por cada día
         for dia, (col_inicio, col_fin) in dias_columnas.items():
-            # Obtener la celda y verificar si está fusionada
-            celda_destino = worksheet[f"{col_inicio}{fila_actual}"]
-            celda_principal = obtener_celda_principal(worksheet, celda_destino)
-            
-            # Verificar el valor del día para el elemento actual
-            valor_dia = valores_dias.get(dia)
-            
-            logger.info(f"Procesando día {dia} para {nombre_elemento}: valor={valor_dia}, celda={celda_principal.coordinate}")
-
-            # Asignar el valor correspondiente
             try:
+                # Intentar obtener el valor del día
+                valor_dia = getattr(valores_dias, dia, None)
+                logger.info(f"\nProcesando día: {dia}")
+                logger.info(f"Columnas para {dia}: {col_inicio}-{col_fin}")
+                logger.info(f"Valor encontrado para {dia}: {valor_dia}")
+                
+                # Obtener la celda y verificar si está fusionada
+                celda_destino = worksheet[f"{col_inicio}{fila_actual}"]
+                celda_principal = obtener_celda_principal(worksheet, celda_destino)
+                
+                logger.info(f"Celda destino: {celda_destino.coordinate}")
+                logger.info(f"Celda principal: {celda_principal.coordinate}")
+
+                # Asignar el valor correspondiente
                 if valor_dia is True:
+                    logger.info(f"Estableciendo ✔ en celda {celda_principal.coordinate}")
                     celda_principal.value = "✔"
                     celda_principal.font = Font(name='Segoe UI Symbol', size=22, bold=True)
                     celda_principal.alignment = Alignment(horizontal='center', vertical='center')
                 elif valor_dia is False:
+                    logger.info(f"Estableciendo ❌ en celda {celda_principal.coordinate}")
                     celda_principal.value = "❌"
                     celda_principal.font = Font(name='Segoe UI Symbol', size=22, bold=True)
                     celda_principal.alignment = Alignment(horizontal='center', vertical='center')
                 else:
+                    logger.info(f"Dejando celda {celda_principal.coordinate} vacía")
                     celda_principal.value = ""
-                    
-                # Verificar que el valor se estableció correctamente
+                
+                # Verificar el valor final
                 logger.info(f"Valor final en celda {celda_principal.coordinate}: {celda_principal.value}")
                 
             except Exception as e:
-                logger.error(f"Error al establecer valor en celda {celda_principal.coordinate}: {str(e)}")
+                logger.error(f"Error procesando día {dia}: {str(e)}", exc_info=True)
 
-    logger.info("Procesamiento de inspección completado")
+    logger.info("==================== FIN PROCESAMIENTO ====================")
 
     # Procesar imágenes si existen
     if 'IMAGENES' in data:
