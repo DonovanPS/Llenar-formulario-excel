@@ -96,7 +96,7 @@ def procesar_excel_dinamico(data):
                 cell.alignment = estilo_formulario['alignment']
 
     # Obtener la data de inspección
-    inspeccion = data.get("inspecciones", {})
+    inspeccion = data.get("INSPECCION", {})
     logger.info(f"Estructura de inspecciones: {type(inspeccion)}")
     logger.info(f"Contenido de inspecciones: {inspeccion}")
 
@@ -114,7 +114,7 @@ def procesar_excel_dinamico(data):
         for dia, (col_inicio, col_fin) in dias_columnas.items():
             try:
                 # Intentar obtener el valor del día
-                valor_dia = getattr(valores_dias, dia, None)
+                valor_dia = valores_dias.get(dia)
                 logger.info(f"\nProcesando día: {dia}")
                 logger.info(f"Columnas para {dia}: {col_inicio}-{col_fin}")
                 logger.info(f"Valor encontrado para {dia}: {valor_dia}")
