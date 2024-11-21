@@ -47,13 +47,13 @@ def procesar_excel_dinamico(data):
 
     # Configuración base de columnas
     dias_columnas = {
-        "Lunes": ("E", "G"),
-        "Martes": ("H", "J"),
-        "Miercoles": ("K", "M"),
-        "Jueves": ("N", "P"),
-        "Viernes": ("Q", "S"),
-        "Sabado": ("T", "V"),
-        "Domingo": ("W", "Y")
+        "lunes": ("E", "G"),
+        "martes": ("H", "J"),
+        "miercoles": ("K", "M"),
+        "jueves": ("N", "P"),
+        "viernes": ("Q", "S"),
+        "sabado": ("T", "V"),
+        "domingo": ("W", "Y")
     }
 
     # Estilo para las celdas del formulario
@@ -96,7 +96,7 @@ def procesar_excel_dinamico(data):
                 cell.alignment = estilo_formulario['alignment']
 
     # Obtener la data de inspección
-    inspeccion = data.get("INSPECCION", {})
+    inspeccion = data.get("inspecciones", {})
     logger.info(f"Datos de inspección recibidos: {inspeccion}")
 
     fila_inicial = 11
@@ -108,12 +108,12 @@ def procesar_excel_dinamico(data):
 
         # Iterar por cada día
         for dia, (col_inicio, col_fin) in dias_columnas.items():
+            # Obtener el valor del día desde la estructura Week
+            valor_dia = getattr(valores_dias, dia, None)
+            
             # Obtener la celda y verificar si está fusionada
             celda_destino = worksheet[f"{col_inicio}{fila_actual}"]
             celda_principal = obtener_celda_principal(worksheet, celda_destino)
-            
-            # Verificar el valor del día para el elemento actual
-            valor_dia = valores_dias.get(dia)
             
             logger.info(f"Procesando día {dia} para {nombre_elemento}: valor={valor_dia}, celda={celda_principal.coordinate}")
 
@@ -167,7 +167,7 @@ def insertar_imagenes(ws, imagenes_data):
     grupos_firma_user = {
         'lunes': ('E', 'G'),
         'martes': ('H', 'J'),
-        'miércoles': ('K', 'M'),
+        'miercoles': ('K', 'M'),
         'jueves': ('N', 'P'),
         'viernes': ('Q', 'S'),
         'sábado': ('T', 'V'),
