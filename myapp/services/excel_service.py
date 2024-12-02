@@ -94,41 +94,7 @@ def rellenar_formulario(ws, data):
                 print(f"No se pudo actualizar la celda {celda.coordinate} correctamente.")
         else:
             print(f"No se encontró la etiqueta '{etiqueta}' en la celda {celda.coordinate}.")
-
-    # Buscar y actualizar el "Codigo"
-    if codigo:
-        found = False
-        for row in ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
-            for cell in row:
-                if cell.value and "codigo:" in str(cell.value).strip().lower():
-                    # Obtener la celda principal en caso de ser fusionada
-                    rango_fusionado, celda_principal = obtener_rango_fusionado(ws, cell)
-                    # Actualizar el valor en la celda encontrada
-                    actualizar_celda_con_etiqueta(celda_principal, "Codigo", codigo)
-                    found = True
-                    break
-            if found:
-                break
-        if not found:
-            print("No se encontró una celda para 'Codigo'.")
-
-    # Buscar y actualizar la "Fecha de Emision"
-    if fecha_emision:
-        found = False
-        for row in ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
-            for cell in row:
-                if cell.value and "fecha de emision:" in str(cell.value).strip().lower():
-                    # Obtener la celda principal en caso de ser fusionada
-                    rango_fusionado, celda_principal = obtener_rango_fusionado(ws, cell)
-                    # Actualizar el valor en la celda encontrada
-                    actualizar_celda_con_etiqueta(celda_principal, "Fecha de Emision", fecha_emision)
-                    found = True
-                    break
-            if found:
-                break
-        if not found:
-            print("No se encontró una celda para 'Fecha de Emision'.")
-
+            
     # Iterar sobre los datos del formulario
     for key, value in data.items():
         # Normalizar la clave del JSON
