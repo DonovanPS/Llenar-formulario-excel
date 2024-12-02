@@ -62,6 +62,7 @@ def obtener_rango_fusionado(hoja, celda):
 def rellenar_formulario(ws, data):
     codigo = data.pop("Codigo", None)
     fecha_emision = data.pop("Fecha de Emision", None)
+    km_total = data.pop("KM TOTAL", None)
 
     # Función para limpiar y normalizar el texto
     def normalizar_texto(texto):
@@ -94,7 +95,18 @@ def rellenar_formulario(ws, data):
                 print(f"No se pudo actualizar la celda {celda.coordinate} correctamente.")
         else:
             print(f"No se encontró la etiqueta '{etiqueta}' en la celda {celda.coordinate}.")
-            
+    if km_total:
+        # Obtener el rango fusionado y la celda principal para Q8
+        celda_km = ws['Q8']
+        rango_fusionado, celda_principal = obtener_rango_fusionado(ws, celda_km)
+        
+        # Aplicar el formato (Arial 14, negrita)
+        fuente = Font(name='Arial', size=14, bold=True)
+        celda_principal.font = fuente
+        
+        # Asignar el valor
+        celda_principal.value = km_total
+
     # Iterar sobre los datos del formulario
     for key, value in data.items():
         # Normalizar la clave del JSON
