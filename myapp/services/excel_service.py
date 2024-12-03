@@ -101,7 +101,7 @@ def rellenar_formulario(ws, data):
         rango_fusionado, celda_principal = obtener_rango_fusionado(ws, celda_km)
         
         # Aplicar el formato (Arial 14, negrita)
-        fuente = Font(name='Arial', size=14, bold=True)
+        fuente = Font(name='Arial', size=12, bold=True)
         celda_principal.font = fuente
         
         # Asignar el valor
