@@ -273,7 +273,7 @@ def insertar_imagenes(ws, imagenes_data):
 
     # Definir tamaños fijos para cada tipo de imagen (ancho, alto) en píxeles
     tamanos_fijos = {
-        'FIRMA_REP': (100, 50),
+        'FIRMA_REP': (110, 80),
         'LOGO': (200, 100), 
         'FIRMA_USER': (150, 75),  
         'FIRMA_ENCARGADO': (180, 105)
