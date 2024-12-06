@@ -320,7 +320,7 @@ def insertar_imagenes(ws, imagenes_data, pie_tabla):
                 print("Insertando firmas en los días correspondientes...")
                 for celdas_verificar, celda_firma in grupos_celdas_firma_rep:
                     if any(ws[celda].value for celda in celdas_verificar):
-                        # Obtener el d��a correspondiente a este grupo de celdas
+                        # Obtener el día correspondiente a este grupo de celdas
                         columna_dia = celda_firma[0]  
                         dia = columnas_dias.get(columna_dia)
                         
@@ -330,9 +330,12 @@ def insertar_imagenes(ws, imagenes_data, pie_tabla):
                         # Construir la clave de firma
                         firma_key = f'FIRMA_USER_{uid_modificador}'
                         
-                        # Verificar si existe una firma específica para ese UID en imagenes_data
-                        if firma_key in imagenes_data:
-                            firma_a_usar = imagenes_data[firma_key]
+                        # Obtener el diccionario de firmas relevantes
+                        firmas_relevantes = imagenes_data.get('FIRMAS_RELV', {})
+                        
+                        # Verificar si existe una firma específica para ese UID en firmas_relevantes
+                        if firma_key in firmas_relevantes:
+                            firma_a_usar = firmas_relevantes[firma_key]
                             print(f"Usando firma específica encontrada para UID {uid_modificador} en {dia}")
                         else:
                             # Si no existe una firma específica, usar FIRMA_USER por defecto
