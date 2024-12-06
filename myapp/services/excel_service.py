@@ -271,7 +271,7 @@ def insertar_imagenes(ws, imagenes_data):
         'FIRMA_ENCARGADO': 'M84'
     }
 
-    # Definir tamaños fijos para cada tipo de imagen (ancho, alto) en píxeles
+    # Definir tamaños fijos para cada tipo de imagen
     tamanos_fijos = {
         'FIRMA_REP': (110, 80),
         'LOGO': (200, 100), 
@@ -279,38 +279,53 @@ def insertar_imagenes(ws, imagenes_data):
         'FIRMA_ENCARGADO': (180, 105)
     }
 
-    # Grupos de celdas para verificar y celdas donde insertar FIRMA-REP
-    grupos_celdas_firma_rep = [
-        (['H14', 'H15', 'H16', 'H17', 'H18', 'H19', 'H21', 'H22', 'H23', 'H24', 'H52', 'H53', 'H54', 
-          'I14', 'I15', 'I16', 'I17', 'I18', 'I19', 'I21', 'I22', 'I23', 'I24', 'I52', 'I53', 'I54'], 'H77'),
-        (['J14', 'J15', 'J16', 'J17', 'J18', 'J19', 'J21', 'J22', 'J23', 'J24', 'J52', 'J53', 'J54', 
-          'K14', 'K15', 'K16', 'K17', 'K18', 'K19', 'K21', 'K22', 'K23', 'K24', 'K52', 'K53', 'K54'], 'J77'),
-        (['L14', 'L15', 'L16', 'L17', 'L18', 'L19', 'L21', 'L22', 'L23', 'L24', 'L52', 'L53', 'L54', 
-          'M14', 'M15', 'M16', 'M17', 'M18', 'M19', 'M21', 'M22', 'M23', 'M24', 'M52', 'M53', 'M54'], 'L77'),
-        (['N14', 'N15', 'N16', 'N17', 'N18', 'N19', 'N21', 'N22', 'N23', 'N24', 'N52', 'N53', 'N54', 
-          'O14', 'O15', 'O16', 'O17', 'O18', 'O19', 'O21', 'O22', 'O23', 'O24', 'O52', 'O53', 'O54'], 'N77'),
-        (['P14', 'P15', 'P16', 'P17', 'P18', 'P19', 'P21', 'P22', 'P23', 'P24', 'P52', 'P53', 'P54', 
-          'Q14', 'Q15', 'Q16', 'Q17', 'Q18', 'Q19', 'Q21', 'Q22', 'Q23', 'Q24', 'Q52', 'Q53', 'Q54'], 'P77'),
-        (['R14', 'R15', 'R16', 'R17', 'R18', 'R19', 'R21', 'R22', 'R23', 'R24', 'R52', 'R53', 'R54', 
-          'S14', 'S15', 'S16', 'S17', 'S18', 'S19', 'S21', 'S22', 'S23', 'S24', 'S52', 'S53', 'S54'], 'R77'),
-        (['T14', 'T15', 'T16', 'T17', 'T18', 'T19', 'T21', 'T22', 'T23', 'T24', 'T52', 'T53', 'T54', 
-          'U14', 'U15', 'U16', 'U17', 'U18', 'U19', 'U21', 'U22', 'U23', 'U24', 'U52', 'U53', 'U54'], 'T77')
-    ]
+    # Mapeo de días a grupos de celdas y ubicación de firma
+    dias_mapping = {
+        'Lunes': (['H14', 'H15', 'H16', 'H17', 'H18', 'H19', 'H21', 'H22', 'H23', 'H24', 'H52', 'H53', 'H54', 
+                   'I14', 'I15', 'I16', 'I17', 'I18', 'I19', 'I21', 'I22', 'I23', 'I24', 'I52', 'I53', 'I54'], 'H77'),
+        'Martes': (['J14', 'J15', 'J16', 'J17', 'J18', 'J19', 'J21', 'J22', 'J23', 'J24', 'J52', 'J53', 'J54', 
+                    'K14', 'K15', 'K16', 'K17', 'K18', 'K19', 'K21', 'K22', 'K23', 'K24', 'K52', 'K53', 'K54'], 'J77'),
+        'Miercoles': (['L14', 'L15', 'L16', 'L17', 'L18', 'L19', 'L21', 'L22', 'L23', 'L24', 'L52', 'L53', 'L54', 
+                       'M14', 'M15', 'M16', 'M17', 'M18', 'M19', 'M21', 'M22', 'M23', 'M24', 'M52', 'M53', 'M54'], 'L77'),
+        'Jueves': (['N14', 'N15', 'N16', 'N17', 'N18', 'N19', 'N21', 'N22', 'N23', 'N24', 'N52', 'N53', 'N54', 
+                    'O14', 'O15', 'O16', 'O17', 'O18', 'O19', 'O21', 'O22', 'O23', 'O24', 'O52', 'O53', 'O54'], 'N77'),
+        'Viernes': (['P14', 'P15', 'P16', 'P17', 'P18', 'P19', 'P21', 'P22', 'P23', 'P24', 'P52', 'P53', 'P54', 
+                     'Q14', 'Q15', 'Q16', 'Q17', 'Q18', 'Q19', 'Q21', 'Q22', 'Q23', 'Q24', 'Q52', 'Q53', 'Q54'], 'P77'),
+        'Sabado': (['R14', 'R15', 'R16', 'R17', 'R18', 'R19', 'R21', 'R22', 'R23', 'R24', 'R52', 'R53', 'R54', 
+                    'S14', 'S15', 'S16', 'S17', 'S18', 'S19', 'S21', 'S22', 'S23', 'S24', 'S52', 'S53', 'S54'], 'R77'),
+        'Domingo': (['T14', 'T15', 'T16', 'T17', 'T18', 'T19', 'T21', 'T22', 'T23', 'T24', 'T52', 'T53', 'T54', 
+                     'U14', 'U15', 'U16', 'U17', 'U18', 'U19', 'U21', 'U22', 'U23', 'U24', 'U52', 'U53', 'U54'], 'T77')
+    }
 
+    # Insertar imágenes básicas (logo, firma encargado)
     for tipo_imagen, url in imagenes_data.items():
-        if url:
-            if tipo_imagen in celdas_imagenes:
-                celda = celdas_imagenes[tipo_imagen]
-                insertar_imagen_en_celda(ws, url, celda, tamanos_fijos[tipo_imagen])
-            elif tipo_imagen == 'FIRMA_REP':
-                print("Insertando firmas de representantes...")
-                for celdas_verificar, celda_firma in grupos_celdas_firma_rep:
-                    if any(ws[celda].value for celda in celdas_verificar):
-                        print(f"Se encontró contenido en el grupo {celdas_verificar}. Insertando firma en {celda_firma}.")
-                        insertar_imagen_en_celda(ws, url, celda_firma, tamanos_fijos[tipo_imagen])
-                        print(f"Firma insertada en {celda_firma} porque se encontró contenido en el grupo {celdas_verificar}")
-                    else:
-                        print(f"No se insertó firma en {celda_firma} porque no se encontró contenido en el grupo {celdas_verificar}")
+        if url and tipo_imagen in celdas_imagenes:
+            celda = celdas_imagenes[tipo_imagen]
+            insertar_imagen_en_celda(ws, url, celda, tamanos_fijos[tipo_imagen])
+
+    # Obtener el diccionario modifiedBy del PIE_TABLA
+    modified_by = ws.parent.pie_tabla.get('MODIFICADO_POR', {}) if hasattr(ws.parent, 'pie_tabla') else {}
+
+    # Procesar las firmas por día según modifiedBy
+    for dia, (celdas_verificar, celda_firma) in dias_mapping.items():
+        if any(ws[celda].value for celda in celdas_verificar):
+            # Obtener el UID del usuario que modificó ese día
+            uid_modificador = modified_by.get(dia)
+            
+            # Determinar qué firma usar
+            firma_url = None
+            if uid_modificador:
+                # Buscar la firma en las firmas relevantes
+                firma_key = f'FIRMA_USER_{uid_modificador}'
+                if firma_key in imagenes_data:
+                    firma_url = imagenes_data[firma_key]
+                else:
+                    # Si no está en relevantes, usar la firma_user por defecto
+                    firma_url = imagenes_data.get('FIRMA_USER')
+            
+            if firma_url:
+                print(f"Insertando firma para {dia} en {celda_firma}")
+                insertar_imagen_en_celda(ws, firma_url, celda_firma, tamanos_fijos['FIRMA_REP'])
 
 def insertar_imagen_en_celda(ws, url, celda, tamano):
     try:
