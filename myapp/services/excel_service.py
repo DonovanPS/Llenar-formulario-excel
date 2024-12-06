@@ -310,6 +310,7 @@ def insertar_imagenes(ws, imagenes_data, pie_tabla):
 
     # Obtener el diccionario modifiedBy del PIE_TABLA
     modified_by = pie_tabla.get('PIE_TABLA', {}).get('MODIFICADO_POR', {})
+    print(modified_by)
 
     for tipo_imagen, url in imagenes_data.items():
         if url:
