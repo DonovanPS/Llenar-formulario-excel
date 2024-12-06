@@ -320,31 +320,40 @@ def insertar_imagenes(ws, imagenes_data, pie_tabla):
                 print("Insertando firmas en los días correspondientes...")
                 for celdas_verificar, celda_firma in grupos_celdas_firma_rep:
                     if any(ws[celda].value for celda in celdas_verificar):
-                        # Obtener el día correspondiente a este grupo de celdas
+                        # Obtener el d��a correspondiente a este grupo de celdas
                         columna_dia = celda_firma[0]  
                         dia = columnas_dias.get(columna_dia)
+                        print(f"\n=== Procesando día: {dia} ===")
+                        print(f"Columna: {columna_dia}, Celda firma: {celda_firma}")
                         
                         # Obtener el UID del usuario que modificó ese día
                         uid_modificador = modified_by.get(dia)
+                        print(f"UID del modificador para {dia}: {uid_modificador}")
                         
                         # Construir la clave de firma
                         firma_key = f'FIRMA_USER_{uid_modificador}'
+                        print(f"Buscando firma con clave: {firma_key}")
                         
                         # Obtener el diccionario de firmas relevantes
                         firmas_relevantes = imagenes_data.get('FIRMAS_RELV', {})
+                        print(f"Firmas relevantes disponibles: {list(firmas_relevantes.keys())}")
                         
                         # Verificar si existe una firma específica para ese UID en firmas_relevantes
                         if firma_key in firmas_relevantes:
                             firma_a_usar = firmas_relevantes[firma_key]
-                            print(f"Usando firma específica encontrada para UID {uid_modificador} en {dia}")
+                            print(f"✅ Encontrada firma específica para {firma_key}")
+                            print(f"URL de firma específica: {firma_a_usar[:50]}...")
                         else:
-                            # Si no existe una firma específica, usar FIRMA_USER por defecto
                             firma_a_usar = imagenes_data['FIRMA_USER']
-                            print(f"No se encontró firma específica para UID {uid_modificador}, usando firma por defecto en {dia}")
+                            print(f"❌ No se encontró firma específica para {firma_key}")
+                            print(f"Usando firma por defecto (FIRMA_USER): {firma_a_usar[:50]}...")
 
                         if firma_a_usar:
-                            print(f"Insertando firma en {celda_firma} para el día {dia}")
+                            print(f"Insertando firma en celda {celda_firma}")
                             insertar_imagen_en_celda(ws, firma_a_usar, celda_firma, tamanos_fijos['FIRMA_REP'])
+                            print(f"✅ Firma insertada exitosamente en {celda_firma}")
+                        else:
+                            print(f"❌ Error: No se encontró firma para insertar en {celda_firma}")
                     else:
                         print(f"No se insertó firma en {celda_firma} porque no se encontró contenido en el grupo")
 
