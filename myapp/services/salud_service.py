@@ -14,8 +14,9 @@ logger = logging.getLogger(__name__)
 
 def get_template_path():
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    return os.path.join(base_dir, 'template', 'AUTOREPORTE.xlsx')
-
+    template_path = os.path.join(base_dir, 'template', 'AUTOREPORTE.xlsx')
+    print(f"Template path: {template_path}")
+    return template_path
 
 def procesar_excel_salud(data):
     """
@@ -24,8 +25,13 @@ def procesar_excel_salud(data):
     logger.info("==================== INICIO PROCESAMIENTO ====================")
     logger.info(f"Data recibida: {data}")
     
-    wb = load_workbook(get_template_path())
-    worksheet = wb.active
+    try:
+        wb = load_workbook(get_template_path())
+        worksheet = wb.active
+        print("Plantilla cargada exitosamente.")
+    except Exception as e:
+        logger.error(f"Error al cargar la plantilla de Excel: {e}")
+        return None
 
     dias_columnas = {
         "lunes": ("AF", "AG"),
@@ -68,10 +74,14 @@ def procesar_excel_salud(data):
         }
         for campo, celda in campos_formulario.items():
             if campo in formulario:
-                cell = worksheet[celda.split(':')[0]]
-                cell.value = formulario[campo]
-                cell.font = estilo_formulario['font']
-                cell.alignment = estilo_formulario['alignment']
+                try:
+                    cell = worksheet[celda.split(':')[0]]
+                    cell.value = formulario[campo]
+                    cell.font = estilo_formulario['font']
+                    cell.alignment = estilo_formulario['alignment']
+                    print(f"Campo {campo} procesado en la celda {celda}.")
+                except Exception as e:
+                    logger.error(f"Error al procesar el campo {campo}: {e}")
 
     # Obtener la data de inspección
     inspeccion = data.get("INSPECCION", {})
@@ -99,19 +109,28 @@ def procesar_excel_salud(data):
                     celda_principal.alignment = Alignment(horizontal='center', vertical='center')
                 else:
                     celda_principal.value = ""
+                print(f"Valor para {nombre_elemento} en {dia}: {valor_dia}")
                 
             except Exception as e:
-                logger.error(f"Error en {nombre_elemento} - {dia}: {str(e)}")
+                logger.error(f"Error en {nombre_elemento} - {dia}: {e}")
 
     logger.info("==================== FIN PROCESAMIENTO ====================")
 
     # Procesar imágenes si existen
     if 'IMAGENES' in data:
-        insertar_imagenes_salud(worksheet, data['IMAGENES'])
+        try:
+            insertar_imagenes_salud(worksheet, data['IMAGENES'])
+        except Exception as e:
+            logger.error(f"Error al insertar imágenes: {e}")
 
-    excel_buffer = io.BytesIO()
-    wb.save(excel_buffer)
-    excel_buffer.seek(0)
+    try:
+        excel_buffer = io.BytesIO()
+        wb.save(excel_buffer)
+        excel_buffer.seek(0)
+        print("Archivo Excel guardado exitosamente.")
+    except Exception as e:
+        logger.error(f"Error al guardar el archivo Excel: {e}")
+        return None
 
     return excel_buffer
 
@@ -154,12 +173,14 @@ def insertar_imagenes_salud(ws, imagenes_data):
         insertar_imagen_en_celda(ws, imagenes_data['LOGO'], 
                                celdas_imagenes['LOGO'], 
                                tamanos_fijos['LOGO'])
+        print("Logo insertado.")
 
     # Insertar imagen de TRANS si existe
     if 'TRANS' in imagenes_data:
         insertar_imagen_en_celda(ws, imagenes_data['TRANS'], 
                                celdas_imagenes['TRANS'], 
                                tamanos_fijos['TRANS'])
+        print("Imagen TRANS insertada.")
 
     # Insertar firma de usuario donde corresponda
     if 'FIRMA_USER' in imagenes_data:
@@ -171,6 +192,7 @@ def insertar_imagenes_salud(ws, imagenes_data):
                 insertar_imagen_en_celda(ws, imagenes_data['FIRMA_USER'],
                                        celda_firma,
                                        tamanos_fijos['LOGO'])  # Reutilizamos el tamaño del logo para la firma
+                print(f"Firma insertada para {dia}.")
 
 def insertar_imagen_en_celda(ws, url, celda, tamano):
     """Inserta una imagen en una celda específica"""
