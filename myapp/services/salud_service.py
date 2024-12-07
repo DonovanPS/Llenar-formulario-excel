@@ -148,8 +148,8 @@ def insertar_imagenes_salud(ws, imagenes_data):
 
     # Tamaños fijos para cada tipo de imagen
     tamanos_fijos = {
-        'LOGO': (300, 150),
-        'TRANS': (300, 150)
+        'LOGO': (250, 120),
+        'FIRMA': (80,40)
     }
 
     # Grupos de celdas para verificar firma por día
@@ -184,12 +184,6 @@ def insertar_imagenes_salud(ws, imagenes_data):
         print("Logo insertado.")
 
     # Insertar imagen de TRANS si existe
-    if 'TRANS' in imagenes_data:
-        insertar_imagen_en_celda(ws, imagenes_data['TRANS'], 
-                               celdas_imagenes['TRANS'], 
-                               tamanos_fijos['TRANS'])
-        print("Imagen TRANS insertada.")
-
     # Insertar firma de usuario donde corresponda
     if 'FIRMA_USER' in imagenes_data:
         for dia, (col_inicio, col_fin) in grupos_firma_user.items():
@@ -204,7 +198,7 @@ def insertar_imagenes_salud(ws, imagenes_data):
                 print(f"Insertando firma en la celda: {celda_firma} para el día: {dia}")
                 insertar_imagen_en_celda(ws, imagenes_data['FIRMA_USER'],
                                        celda_firma,
-                                       tamanos_fijos['LOGO'])
+                                       tamanos_fijos['FIRMA'])
                 print(f"Firma insertada para {dia}.")
             else:
                 print(f"No se encontró contenido en las columnas {col_inicio}-{col_fin} para el día: {dia}")
