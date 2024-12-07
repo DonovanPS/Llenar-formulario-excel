@@ -7,6 +7,7 @@ from openpyxl.drawing.image import Image as XLImage
 import requests
 from io import BytesIO
 import logging
+from openpyxl.utils import column_index_from_string, get_column_letter
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -168,20 +169,6 @@ def insertar_imagenes_salud(ws, imagenes_data):
                     return True
         return False
 
-    def columna_a_indice(columna):
-        """Convierte una columna de Excel (e.g., 'A', 'Z', 'AA') a un índice numérico."""
-        indice = 0
-        for char in columna:
-            indice = indice * 26 + (ord(char.upper()) - ord('A')) + 1
-        return indice
-
-    def indice_a_columna(indice):
-        """Convierte un índice numérico a una columna de Excel (e.g., 1 -> 'A', 27 -> 'AA')."""
-        columna = ""
-        while indice > 0:
-            indice, remainder = divmod(indice - 1, 26)
-            columna = chr(65 + remainder) + columna
-        return columna
 
     # Insertar logo si existe
     if 'LOGO' in imagenes_data:
@@ -202,10 +189,10 @@ def insertar_imagenes_salud(ws, imagenes_data):
         for dia, (col_inicio, col_fin) in grupos_firma_user.items():
             if verificar_contenido_columna(col_inicio, col_fin):
                 # Calculamos la columna del medio
-                indice_inicio = columna_a_indice(col_inicio)
-                indice_fin = columna_a_indice(col_fin)
+                indice_inicio = column_index_from_string(col_inicio)
+                indice_fin = column_index_from_string(col_fin)
                 indice_medio = (indice_inicio + indice_fin) // 2
-                col_media = indice_a_columna(indice_medio)
+                col_media = get_column_letter(indice_medio)
                 
                 celda_firma = f"{col_media}14"
                 insertar_imagen_en_celda(ws, imagenes_data['FIRMA_USER'],
