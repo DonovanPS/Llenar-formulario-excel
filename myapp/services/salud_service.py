@@ -91,12 +91,13 @@ def procesar_excel_salud(data):
     # Iterar sobre los elementos en el JSON
     for idx, (nombre_elemento, valores_dias) in enumerate(inspeccion.items()):
         fila_actual = fila_inicial + idx
-        logger.info(f"Procesando: {nombre_elemento}")
+        print(f"Procesando elemento: {nombre_elemento}")
 
         # Iterar por cada día
         for dia, (col_inicio, col_fin) in dias_columnas.items():
             try:
                 valor_dia = valores_dias.get(dia)
+                print(f"Valor para {nombre_elemento} en {dia}: {valor_dia}")
                 celda_destino = worksheet[f"{col_inicio}{fila_actual}"]
                 celda_principal = obtener_celda_principal(worksheet, celda_destino)
 
@@ -104,16 +105,18 @@ def procesar_excel_salud(data):
                     celda_principal.value = "✔"
                     celda_principal.font = Font(name='Segoe UI Symbol', size=22, bold=True)
                     celda_principal.alignment = Alignment(horizontal='center', vertical='center')
+                    print(f"Celda {celda_destino.coordinate} actualizada con ✔")
                 elif valor_dia is False:
                     celda_principal.value = "❌"
                     celda_principal.font = Font(name='Segoe UI Symbol', size=22, bold=True)
                     celda_principal.alignment = Alignment(horizontal='center', vertical='center')
+                    print(f"Celda {celda_destino.coordinate} actualizada con ❌")
                 else:
                     celda_principal.value = ""
-                print(f"Valor para {nombre_elemento} en {dia}: {valor_dia}")
+                    print(f"Celda {celda_destino.coordinate} vacía")
                 
             except Exception as e:
-                logger.error(f"Error en {nombre_elemento} - {dia}: {e}")
+                print(f"Error en {nombre_elemento} - {dia}: {e}")
 
     logger.info("==================== FIN PROCESAMIENTO ====================")
 
@@ -198,10 +201,13 @@ def insertar_imagenes_salud(ws, imagenes_data):
                 col_media = get_column_letter(indice_medio)
                 
                 celda_firma = f"{col_media}14"
+                print(f"Insertando firma en la celda: {celda_firma} para el día: {dia}")
                 insertar_imagen_en_celda(ws, imagenes_data['FIRMA_USER'],
                                        celda_firma,
                                        tamanos_fijos['LOGO'])
                 print(f"Firma insertada para {dia}.")
+            else:
+                print(f"No se encontró contenido en las columnas {col_inicio}-{col_fin} para el día: {dia}")
 
 def insertar_imagen_en_celda(ws, url, celda, tamano):
     """Inserta una imagen en una celda específica"""
