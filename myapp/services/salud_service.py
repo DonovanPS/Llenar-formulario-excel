@@ -98,7 +98,15 @@ def procesar_excel_salud(data):
             try:
                 valor_dia = valores_dias.get(dia)
                 print(f"Valor para {nombre_elemento} en {dia}: {valor_dia}")
-                celda_destino = worksheet[f"{col_inicio}{fila_actual}"]
+                
+                # Determinar la columna de destino
+                if valor_dia is True:
+                    celda_destino = worksheet[f"{col_inicio}{fila_actual}"]
+                elif valor_dia is False:
+                    celda_destino = worksheet[f"{col_fin}{fila_actual}"]
+                else:
+                    celda_destino = worksheet[f"{col_inicio}{fila_actual}"]
+                
                 celda_principal = obtener_celda_principal(worksheet, celda_destino)
 
                 if valor_dia is True:
