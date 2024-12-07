@@ -168,6 +168,21 @@ def insertar_imagenes_salud(ws, imagenes_data):
                     return True
         return False
 
+    def columna_a_indice(columna):
+        """Convierte una columna de Excel (e.g., 'A', 'Z', 'AA') a un índice numérico."""
+        indice = 0
+        for char in columna:
+            indice = indice * 26 + (ord(char.upper()) - ord('A')) + 1
+        return indice
+
+    def indice_a_columna(indice):
+        """Convierte un índice numérico a una columna de Excel (e.g., 1 -> 'A', 27 -> 'AA')."""
+        columna = ""
+        while indice > 0:
+            indice, remainder = divmod(indice - 1, 26)
+            columna = chr(65 + remainder) + columna
+        return columna
+
     # Insertar logo si existe
     if 'LOGO' in imagenes_data:
         insertar_imagen_en_celda(ws, imagenes_data['LOGO'], 
@@ -187,11 +202,11 @@ def insertar_imagenes_salud(ws, imagenes_data):
         for dia, (col_inicio, col_fin) in grupos_firma_user.items():
             if verificar_contenido_columna(col_inicio, col_fin):
                 # Calculamos la columna del medio
-                if len(col_inicio) == 1 and len(col_fin) == 1:
-                    col_media = chr((ord(col_inicio) + ord(col_fin)) // 2)
-                else:
-                    logger.error(f"Error: Columnas no son caracteres individuales: {col_inicio}, {col_fin}")
-                    continue
+                indice_inicio = columna_a_indice(col_inicio)
+                indice_fin = columna_a_indice(col_fin)
+                indice_medio = (indice_inicio + indice_fin) // 2
+                col_media = indice_a_columna(indice_medio)
+                
                 celda_firma = f"{col_media}14"
                 insertar_imagen_en_celda(ws, imagenes_data['FIRMA_USER'],
                                        celda_firma,
