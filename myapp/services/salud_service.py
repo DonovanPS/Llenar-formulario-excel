@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 def get_template_path():
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    return os.path
+    return os.path.join(base_dir, 'template', 'AUTOREPORTE.xlsx')
+
 
 def procesar_excel_salud(data):
     """
