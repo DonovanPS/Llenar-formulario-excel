@@ -157,7 +157,7 @@ def insertar_imagenes_salud(ws, imagenes_data):
     # Tamaños fijos para cada tipo de imagen
     tamanos_fijos = {
         'LOGO': (250, 120),
-        'FIRMA': (110,120)
+        'FIRMA': (125,130)
     }
 
     # Grupos de celdas para verificar firma por día
