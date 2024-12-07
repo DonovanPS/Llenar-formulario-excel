@@ -7,7 +7,7 @@ from openpyxl.drawing.image import Image as XLImage
 import requests
 from io import BytesIO
 import logging
-from openpyxl.utils import column_index_from_string, get_column_letter
+from openpyxl.utils import get_column_letter, column_index_from_string
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -162,9 +162,12 @@ def insertar_imagenes_salud(ws, imagenes_data):
 
     def verificar_contenido_columna(columna_inicio, columna_fin, fila_inicial=11, fila_final=13):
         """Verifica si hay contenido en el rango de celdas de una columna"""
+        indice_inicio = column_index_from_string(columna_inicio)
+        indice_fin = column_index_from_string(columna_fin)
+        
         for fila in range(fila_inicial, fila_final + 1):
-            for col in range(ord(columna_inicio), ord(columna_fin) + 1):
-                celda = ws[f"{chr(col)}{fila}"]
+            for col in range(indice_inicio, indice_fin + 1):
+                celda = ws[f"{get_column_letter(col)}{fila}"]
                 if celda.value:
                     return True
         return False
