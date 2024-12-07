@@ -85,7 +85,7 @@ def procesar_excel_salud(data):
                     logger.error(f"Error al procesar el campo {campo}: {e}")
 
     # Obtener la data de inspección
-    inspeccion = data.get("INSPECCION", {})
+    inspeccion = data.get("PREGUNTAS", {})
     fila_inicial = 11
     
     # Iterar sobre los elementos en el JSON
