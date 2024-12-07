@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def get_template_path():
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    return os.path.join(base_dir, 'template', 'LIMPIEZA.xlsx')
+    return os.path.join(base_dir, 'template', 'AUTOREPORTE.xlsx')
 
 def validar_datos_inspeccion(inspeccion_data):
     """Valida la estructura y valores de los datos de inspección"""
@@ -43,8 +43,12 @@ def procesar_excel_dinamico(data):
     logger.info("==================== INICIO PROCESAMIENTO ====================")
     logger.info(f"Data recibida: {data}")
     
-    wb = load_workbook(get_template_path())
-    worksheet = wb.active
+    try:
+        wb = load_workbook(get_template_path())
+        worksheet = wb.active
+    except Exception as e:
+        logger.error(f"Error al cargar la plantilla de Excel: {e}")
+        return None
 
     dias_columnas = {
         "lunes": ("E", "G"),
@@ -79,10 +83,13 @@ def procesar_excel_dinamico(data):
         }
         for campo, celda in campos_formulario.items():
             if campo in formulario:
-                cell = worksheet[celda]
-                cell.value = formulario[campo]
-                cell.font = estilo_formulario['font']
-                cell.alignment = estilo_formulario['alignment']
+                try:
+                    cell = worksheet[celda]
+                    cell.value = formulario[campo]
+                    cell.font = estilo_formulario['font']
+                    cell.alignment = estilo_formulario['alignment']
+                except Exception as e:
+                    logger.error(f"Error al procesar el campo {campo}: {e}")
 
     # Obtener la data de inspección
     inspeccion = data.get("INSPECCION", {})
@@ -112,17 +119,24 @@ def procesar_excel_dinamico(data):
                     celda_principal.value = ""
                 
             except Exception as e:
-                logger.error(f"Error en {nombre_elemento} - {dia}: {str(e)}")
+                logger.error(f"Error en {nombre_elemento} - {dia}: {e}")
 
     logger.info("==================== FIN PROCESAMIENTO ====================")
 
     # Procesar imágenes si existen
     if 'IMAGENES' in data:
-        insertar_imagenes(worksheet, data['IMAGENES'])
+        try:
+            insertar_imagenes(worksheet, data['IMAGENES'])
+        except Exception as e:
+            logger.error(f"Error al insertar imágenes: {e}")
 
-    excel_buffer = io.BytesIO()
-    wb.save(excel_buffer)
-    excel_buffer.seek(0)
+    try:
+        excel_buffer = io.BytesIO()
+        wb.save(excel_buffer)
+        excel_buffer.seek(0)
+    except Exception as e:
+        logger.error(f"Error al guardar el archivo Excel: {e}")
+        return None
 
     return excel_buffer
 
