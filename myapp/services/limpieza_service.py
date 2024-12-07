@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def get_template_path():
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    return os.path.join(base_dir, 'template', 'AUTOREPORTE.xlsx')
+    return os.path.join(base_dir, 'template', 'LIMPIEZA.xlsx')
 
 def validar_datos_inspeccion(inspeccion_data):
     """Valida la estructura y valores de los datos de inspección"""
@@ -41,14 +41,10 @@ def procesar_excel_dinamico(data):
     Procesa la plantilla Excel y llena las celdas según la data recibida.
     """
     logger.info("==================== INICIO PROCESAMIENTO ====================")
-    logger.info(f"Data recibida: {data}")
+    logger.info(f"Data completa recibida: {data}")
     
-    try:
-        wb = load_workbook(get_template_path())
-        worksheet = wb.active
-    except Exception as e:
-        logger.error(f"Error al cargar la plantilla de Excel: {e}")
-        return None
+    wb = load_workbook(get_template_path())
+    worksheet = wb.active
 
     dias_columnas = {
         "lunes": ("E", "G"),
@@ -62,8 +58,15 @@ def procesar_excel_dinamico(data):
 
     # Estilo para las celdas del formulario
     estilo_formulario = {
-        'font': Font(name='Arial', size=16, bold=True),
-        'alignment': Alignment(horizontal='center', vertical='center')
+        'font': Font(
+            name='Arial',
+            size=16,
+            bold=True
+        ),
+        'alignment': Alignment(
+            horizontal='center',
+            vertical='center'
+        )
     }
 
     def obtener_celda_principal(hoja, celda):
@@ -76,67 +79,84 @@ def procesar_excel_dinamico(data):
     # Procesar datos del formulario si existen
     if 'FORMULARIO' in data:
         formulario = data['FORMULARIO']
+        
+        # Mapeo de campos y sus celdas correspondientes
         campos_formulario = {
             'FECHA': 'F6',
             'AÑO': 'I6',
             'PLACA': 'T7'
         }
+
+        # Aplicar valores y estilos
         for campo, celda in campos_formulario.items():
             if campo in formulario:
-                try:
-                    cell = worksheet[celda]
-                    cell.value = formulario[campo]
-                    cell.font = estilo_formulario['font']
-                    cell.alignment = estilo_formulario['alignment']
-                except Exception as e:
-                    logger.error(f"Error al procesar el campo {campo}: {e}")
+                cell = worksheet[celda]
+                cell.value = formulario[campo]
+                cell.font = estilo_formulario['font']
+                cell.alignment = estilo_formulario['alignment']
 
     # Obtener la data de inspección
     inspeccion = data.get("INSPECCION", {})
+    logger.info(f"Estructura de inspecciones: {type(inspeccion)}")
+    logger.info(f"Contenido de inspecciones: {inspeccion}")
+
     fila_inicial = 11
     
     # Iterar sobre los elementos en el JSON
     for idx, (nombre_elemento, valores_dias) in enumerate(inspeccion.items()):
         fila_actual = fila_inicial + idx
-        logger.info(f"Procesando: {nombre_elemento}")
+        logger.info(f"\n=== Procesando elemento: {nombre_elemento} ===")
+        logger.info(f"Tipo de valores_dias: {type(valores_dias)}")
+        logger.info(f"Contenido de valores_dias: {valores_dias}")
+        logger.info(f"Fila actual: {fila_actual}")
 
         # Iterar por cada día
         for dia, (col_inicio, col_fin) in dias_columnas.items():
             try:
+                # Intentar obtener el valor del día
                 valor_dia = valores_dias.get(dia)
+                logger.info(f"\nProcesando día: {dia}")
+                logger.info(f"Columnas para {dia}: {col_inicio}-{col_fin}")
+                logger.info(f"Valor encontrado para {dia}: {valor_dia}")
+                
+                # Obtener la celda y verificar si está fusionada
                 celda_destino = worksheet[f"{col_inicio}{fila_actual}"]
                 celda_principal = obtener_celda_principal(worksheet, celda_destino)
+                
+                logger.info(f"Celda destino: {celda_destino.coordinate}")
+                logger.info(f"Celda principal: {celda_principal.coordinate}")
 
+                # Asignar el valor correspondiente
                 if valor_dia is True:
+                    logger.info(f"Estableciendo ✔ en celda {celda_principal.coordinate}")
                     celda_principal.value = "✔"
                     celda_principal.font = Font(name='Segoe UI Symbol', size=22, bold=True)
                     celda_principal.alignment = Alignment(horizontal='center', vertical='center')
                 elif valor_dia is False:
+                    logger.info(f"Estableciendo ❌ en celda {celda_principal.coordinate}")
                     celda_principal.value = "❌"
                     celda_principal.font = Font(name='Segoe UI Symbol', size=22, bold=True)
                     celda_principal.alignment = Alignment(horizontal='center', vertical='center')
                 else:
+                    logger.info(f"Dejando celda {celda_principal.coordinate} vacía")
                     celda_principal.value = ""
                 
+                # Verificar el valor final
+                logger.info(f"Valor final en celda {celda_principal.coordinate}: {celda_principal.value}")
+                
             except Exception as e:
-                logger.error(f"Error en {nombre_elemento} - {dia}: {e}")
+                logger.error(f"Error procesando día {dia}: {str(e)}", exc_info=True)
 
     logger.info("==================== FIN PROCESAMIENTO ====================")
 
     # Procesar imágenes si existen
     if 'IMAGENES' in data:
-        try:
-            insertar_imagenes(worksheet, data['IMAGENES'])
-        except Exception as e:
-            logger.error(f"Error al insertar imágenes: {e}")
+        insertar_imagenes(worksheet, data['IMAGENES'])
 
-    try:
-        excel_buffer = io.BytesIO()
-        wb.save(excel_buffer)
-        excel_buffer.seek(0)
-    except Exception as e:
-        logger.error(f"Error al guardar el archivo Excel: {e}")
-        return None
+    # Guardar en buffer de memoria
+    excel_buffer = io.BytesIO()
+    wb.save(excel_buffer)
+    excel_buffer.seek(0)
 
     return excel_buffer
 
