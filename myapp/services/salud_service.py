@@ -46,7 +46,7 @@ def procesar_excel_salud(data):
 
     # Estilo para las celdas del formulario
     estilo_formulario = {
-        'font': Font(name='Arial', size=16, bold=True),
+        'font': Font(name='Arial', size=12, bold=True),
         'alignment': Alignment(horizontal='center', vertical='center')
     }
 
@@ -149,7 +149,7 @@ def insertar_imagenes_salud(ws, imagenes_data):
     # Tamaños fijos para cada tipo de imagen
     tamanos_fijos = {
         'LOGO': (250, 120),
-        'FIRMA': (80,40)
+        'FIRMA': (110,120)
     }
 
     # Grupos de celdas para verificar firma por día
