@@ -14,9 +14,8 @@ logger = logging.getLogger(__name__)
 
 def get_template_path():
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    template_path = os.path.join(base_dir, 'template', 'AUTOREPORTE.xlsx')
-    print(f"Template path: {template_path}")
-    return template_path
+    return os.path.join(base_dir, 'template', 'AUTOREPORTE.xlsx')
+
 
 def procesar_excel_salud(data):
     """
@@ -25,13 +24,8 @@ def procesar_excel_salud(data):
     logger.info("==================== INICIO PROCESAMIENTO ====================")
     logger.info(f"Data recibida: {data}")
     
-    try:
-        wb = load_workbook(get_template_path())
-        worksheet = wb.active
-        print("Plantilla cargada exitosamente.")
-    except Exception as e:
-        logger.error(f"Error al cargar la plantilla de Excel: {e}")
-        return None
+    wb = load_workbook(get_template_path())
+    worksheet = wb.active
 
     dias_columnas = {
         "lunes": ("AF", "AG"),
@@ -74,14 +68,10 @@ def procesar_excel_salud(data):
         }
         for campo, celda in campos_formulario.items():
             if campo in formulario:
-                try:
-                    cell = worksheet[celda.split(':')[0]]
-                    cell.value = formulario[campo]
-                    cell.font = estilo_formulario['font']
-                    cell.alignment = estilo_formulario['alignment']
-                    print(f"Campo {campo} procesado en la celda {celda}.")
-                except Exception as e:
-                    logger.error(f"Error al procesar el campo {campo}: {e}")
+                cell = worksheet[celda.split(':')[0]]
+                cell.value = formulario[campo]
+                cell.font = estilo_formulario['font']
+                cell.alignment = estilo_formulario['alignment']
 
     # Obtener la data de inspección
     inspeccion = data.get("INSPECCION", {})
@@ -109,28 +99,19 @@ def procesar_excel_salud(data):
                     celda_principal.alignment = Alignment(horizontal='center', vertical='center')
                 else:
                     celda_principal.value = ""
-                print(f"Valor para {nombre_elemento} en {dia}: {valor_dia}")
                 
             except Exception as e:
-                logger.error(f"Error en {nombre_elemento} - {dia}: {e}")
+                logger.error(f"Error en {nombre_elemento} - {dia}: {str(e)}")
 
     logger.info("==================== FIN PROCESAMIENTO ====================")
 
     # Procesar imágenes si existen
     if 'IMAGENES' in data:
-        try:
-            insertar_imagenes_salud(worksheet, data['IMAGENES'])
-        except Exception as e:
-            logger.error(f"Error al insertar imágenes: {e}")
+        insertar_imagenes_salud(worksheet, data['IMAGENES'])
 
-    try:
-        excel_buffer = io.BytesIO()
-        wb.save(excel_buffer)
-        excel_buffer.seek(0)
-        print("Archivo Excel guardado exitosamente.")
-    except Exception as e:
-        logger.error(f"Error al guardar el archivo Excel: {e}")
-        return None
+    excel_buffer = io.BytesIO()
+    wb.save(excel_buffer)
+    excel_buffer.seek(0)
 
     return excel_buffer
 
@@ -173,25 +154,27 @@ def insertar_imagenes_salud(ws, imagenes_data):
         insertar_imagen_en_celda(ws, imagenes_data['LOGO'], 
                                celdas_imagenes['LOGO'], 
                                tamanos_fijos['LOGO'])
-        print("Logo insertado.")
 
     # Insertar imagen de TRANS si existe
     if 'TRANS' in imagenes_data:
         insertar_imagen_en_celda(ws, imagenes_data['TRANS'], 
                                celdas_imagenes['TRANS'], 
                                tamanos_fijos['TRANS'])
-        print("Imagen TRANS insertada.")
 
     # Insertar firma de usuario donde corresponda
     if 'FIRMA_USER' in imagenes_data:
         for dia, (col_inicio, col_fin) in grupos_firma_user.items():
             if verificar_contenido_columna(col_inicio, col_fin):
                 # Calculamos la columna del medio
-                col_media = chr(ord(col_inicio) + 1)  # Avanzamos una letra para obtener la columna del medio
+                if len(col_inicio) == 1 and len(col_fin) == 1:
+                    col_media = chr((ord(col_inicio) + ord(col_fin)) // 2)
+                else:
+                    logger.error(f"Error: Columnas no son caracteres individuales: {col_inicio}, {col_fin}")
+                    continue
                 celda_firma = f"{col_media}14"
                 insertar_imagen_en_celda(ws, imagenes_data['FIRMA_USER'],
                                        celda_firma,
-                                       tamanos_fijos['LOGO'])  # Reutilizamos el tamaño del logo para la firma
+                                       tamanos_fijos['LOGO'])
                 print(f"Firma insertada para {dia}.")
 
 def insertar_imagen_en_celda(ws, url, celda, tamano):
