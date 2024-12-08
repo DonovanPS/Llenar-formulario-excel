@@ -69,6 +69,7 @@ def procesar_excel_salud(data):
             'eps': 'D6:N6',
             'arl': 'S6:AE6',
             'afp': 'AG6:AK6',
+            'proyecto': 'AO6:AS6',
             'telefonoEmergencia': 'AH7:AJ7',
             'parentesco': 'AM7',
             'direccion': 'AQ7:AR7'
