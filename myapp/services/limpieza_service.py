@@ -128,13 +128,13 @@ def insertar_imagenes(ws, imagenes_data):
     print(f"Datos recibidos - FIRMAS_RELV: {firmas_relevantes}")
     
     grupos_firma_user = {
-        'lunes': ('E', 'G'),
-        'martes': ('H', 'J'),
-        'miercoles': ('K', 'M'),
-        'jueves': ('N', 'P'),
-        'viernes': ('Q', 'S'),
-        'sabado': ('T', 'V'),
-        'domingo': ('W', 'Y')
+        'Lunes': ('E', 'G'),
+        'Martes': ('H', 'J'),
+        'Miercoles': ('K', 'M'),
+        'Jueves': ('N', 'P'),
+        'Viernes': ('Q', 'S'),
+        'Sabado': ('T', 'V'),
+        'Domingo': ('W', 'Y')
     }
 
     def verificar_contenido_columna(columna_inicio, columna_fin, fila_inicial=11, fila_final=20):
