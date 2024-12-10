@@ -172,6 +172,9 @@ def insertar_imagenes_salud(ws, imagenes_data):
         'domingo': ('AR', 'AS')
     }
 
+    modified_by = imagenes_data.get('MODIFICADO_POR', {})
+    firmas_relevantes = imagenes_data.get('FIRMAS_RELV', {})
+
     def verificar_contenido_columna(columna_inicio, columna_fin, fila_inicial=11, fila_final=13):
         """Verifica si hay contenido en el rango de celdas de una columna"""
         indice_inicio = column_index_from_string(columna_inicio)
@@ -184,7 +187,6 @@ def insertar_imagenes_salud(ws, imagenes_data):
                     return True
         return False
 
-
     # Insertar logo si existe
     if 'LOGO' in imagenes_data:
         insertar_imagen_en_celda(ws, imagenes_data['LOGO'], 
@@ -192,9 +194,8 @@ def insertar_imagenes_salud(ws, imagenes_data):
                                tamanos_fijos['LOGO'])
         print("Logo insertado.")
 
-    # Insertar imagen de TRANS si existe
-    # Insertar firma de usuario donde corresponda
-    if 'FIRMA_USER' in imagenes_data:
+    # Insertar imágenes de firmas de usuario específicas por día
+    if 'FIRMA_USER' in imagenes_data or 'FIRMAS_RELV' in imagenes_data:
         for dia, (col_inicio, col_fin) in grupos_firma_user.items():
             if verificar_contenido_columna(col_inicio, col_fin):
                 # Calculamos la columna del medio
@@ -204,14 +205,39 @@ def insertar_imagenes_salud(ws, imagenes_data):
                 col_media = get_column_letter(indice_medio)
                 
                 celda_firma = f"{col_media}14"
-                print(f"Insertando firma en la celda: {celda_firma} para el día: {dia}")
-                insertar_imagen_en_celda(ws, imagenes_data['FIRMA_USER'],
-                                       celda_firma,
-                                       tamanos_fijos['FIRMA'])
-                print(f"Firma insertada para {dia}.")
+                
+                # Obtener el UID del usuario que modificó ese día
+                uid_modificador = modified_by.get(dia)
+                
+                if uid_modificador:
+                    # Construir la clave de firma específica
+                    firma_key = f'FIRMA_USER_{uid_modificador}'
+                    
+                    # Determinar qué firma usar
+                    if firma_key in firmas_relevantes:
+                        # Usar la firma específica del usuario para ese día
+                        firma_a_usar = firmas_relevantes[firma_key]
+                        print(f"Usando firma específica para {dia}: {firma_key}")
+                    else:
+                        # Caer back a la firma por defecto si no hay firma específica
+                        firma_a_usar = imagenes_data.get('FIRMA_USER')
+                        print(f"Usando firma por defecto para {dia}")
+                else:
+                    # Si no hay uid modificador, usar la firma por defecto
+                    firma_a_usar = imagenes_data.get('FIRMA_USER')
+                    print(f"No se encontró UID modificador para {dia}, usando firma por defecto")
+                
+                # Insertar la firma si existe
+                if firma_a_usar:
+                    print(f"Insertando firma en la celda: {celda_firma} para el día: {dia}")
+                    insertar_imagen_en_celda(ws, firma_a_usar,
+                                           celda_firma,
+                                           tamanos_fijos['FIRMA'])
+                    print(f"Firma insertada para {dia}.")
+                else:
+                    print(f"No se encontró firma para {dia}")
             else:
                 print(f"No se encontró contenido en las columnas {col_inicio}-{col_fin} para el día: {dia}")
-
 def insertar_imagen_en_celda(ws, url, celda, tamano):
     """Inserta una imagen en una celda específica"""
     try:
