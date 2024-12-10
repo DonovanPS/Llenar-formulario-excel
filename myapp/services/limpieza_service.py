@@ -185,6 +185,9 @@ def insertar_imagenes(ws, imagenes_data):
         'sábado': ('T', 'V'),
         'domingo': ('W', 'Y')
     }
+# Extraer datos de modificación y firmas
+    modified_by = imagenes_data.get('MODIFICADO_POR', {})
+    firmas_relevantes = imagenes_data.get('FIRMAS_RELV', {})
 
     def verificar_contenido_columna(columna_inicio, columna_fin, fila_inicial=11, fila_final=20):
         """Verifica si hay contenido en el rango de celdas de una columna"""
@@ -201,27 +204,29 @@ def insertar_imagenes(ws, imagenes_data):
                                celdas_imagenes['LOGO'], 
                                tamanos_fijos['LOGO'])
 
-    # Insertar firma de usuario donde corresponda
-    if 'FIRMA_USER' in imagenes_data:
-        for dia, (col_inicio, col_fin) in grupos_firma_user.items():
-            if verificar_contenido_columna(col_inicio, col_fin):
-                # Calculamos la columna del medio
-                col_media = chr(ord(col_inicio) + 1)  # Avanzamos una letra para obtener la columna del medio
-                celda_firma = f"{col_media}25"
+    # Insertar firmas de usuario para cada día
+    for dia, (col_inicio, col_fin) in grupos_firma_user.items():
+        # Verificar si hay contenido en las columnas del día
+        if verificar_contenido_columna(col_inicio, col_fin):
+            # Calcular la columna del medio para la firma
+            col_media = chr(ord(col_inicio) + 1)
+            celda_firma = f"{col_media}14"  # Siempre en fila 14
 
-                uid_modificador = modified_by.get(dia)
-
-                firmas_relevantes = imagenes_data.get('FIRMAS_RELV', {})
-
-                firma_key = f'FIRMA_USER_{uid_modificador}'               
-                celda_firma = f"{col_media}14"
-
+            # Obtener el UID del usuario que modificó ese día
+            uid_modificador = modified_by.get(dia)
+            
+            # Construir la clave de firma
+            if uid_modificador:
+                firma_key = f'FIRMA_USER_{uid_modificador}'
+                
+                # Verificar si existe la firma para este usuario
                 if firma_key in firmas_relevantes:
                     firma_a_usar = firmas_relevantes[firma_key]
-                if firma_a_usar:
+                    
+                    # Insertar la firma
                     insertar_imagen_en_celda(ws, firma_a_usar,
-                                        celda_firma,
-                                        tamanos_fijos['FIRMA_USER'])
+                                             celda_firma,
+                                             tamanos_fijos['FIRMA_USER'])
 
 def insertar_imagen_en_celda(ws, url, celda, tamano):
     """Inserta una imagen en una celda específica"""
