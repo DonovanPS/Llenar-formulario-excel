@@ -174,6 +174,7 @@ def insertar_imagenes(ws, imagenes_data):
         'FIRMA_USER': (200, 115)
     }
 
+    modified_by = imagenes_data.get('MODIFICADO_POR', {})
     # Grupos de celdas para verificar firma por día
     grupos_firma_user = {
         'lunes': ('E', 'G'),
@@ -207,9 +208,20 @@ def insertar_imagenes(ws, imagenes_data):
                 # Calculamos la columna del medio
                 col_media = chr(ord(col_inicio) + 1)  # Avanzamos una letra para obtener la columna del medio
                 celda_firma = f"{col_media}25"
-                insertar_imagen_en_celda(ws, imagenes_data['FIRMA_USER'],
-                                       celda_firma,
-                                       tamanos_fijos['FIRMA_USER'])
+
+                uid_modificador = modified_by.get(dia)
+
+                firmas_relevantes = imagenes_data.get('FIRMAS_RELV', {})
+
+                firma_key = f'FIRMA_USER_{uid_modificador}'               
+                celda_firma = f"{col_media}14"
+
+                if firma_key in firmas_relevantes:
+                    firma_a_usar = firmas_relevantes[firma_key]
+                if firma_a_usar:
+                    insertar_imagen_en_celda(ws, firma_a_usar,
+                                        celda_firma,
+                                        tamanos_fijos['FIRMA_USER'])
 
 def insertar_imagen_en_celda(ws, url, celda, tamano):
     """Inserta una imagen en una celda específica"""
