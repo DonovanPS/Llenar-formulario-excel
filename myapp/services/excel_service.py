@@ -193,6 +193,18 @@ def rellenar_tabla(ws, data):
                                 celda_destino_false = ws[f"{columna_false}{row}"]
                                 celda_principal_false = obtener_celda_principal(ws, celda_destino_false)
                                 celda_principal_false.value = 'X'
+
+                    # Verificar celdas vacías y asignar "N/A"
+                    for dia_key in dias_columna.keys():
+                        columna_true, columna_false = dias_columna[dia_key]
+                        celda_destino_true = ws[f"{columna_true}{row}"]
+                        celda_destino_false = ws[f"{columna_false}{row}"]
+
+                        if celda_destino_true.value is None:
+                            celda_destino_true.value = 'N/A'
+                        if celda_destino_false.value is None:
+                            celda_destino_false.value = 'N/A'
+
                     break
 
 
@@ -319,7 +331,7 @@ def insertar_imagenes(ws, imagenes_data, pie_tabla):
             elif tipo_imagen == 'FIRMA_REP' or tipo_imagen.startswith('FIRMA_USER_'):
                 for celdas_verificar, celda_firma in grupos_celdas_firma_rep:
                     if any(ws[celda].value for celda in celdas_verificar):
-                        # Obtener el d��a correspondiente a este grupo de celdas
+                        # Obtener el día correspondiente a este grupo de celdas
                         columna_dia = celda_firma[0]  
                         dia = columnas_dias.get(columna_dia)
                         
