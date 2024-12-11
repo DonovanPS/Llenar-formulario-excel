@@ -118,7 +118,7 @@ def insertar_imagenes(ws, imagenes_data):
 
     tamanos_fijos = {
         'LOGO': (200, 100),
-        'FIRMA_USER': (200, 115)
+        'FIRMA_USER': (180, 100)
     }
 
     modified_by = imagenes_data.get('MODIFICADO_POR', {})
