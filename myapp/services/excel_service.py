@@ -164,6 +164,12 @@ def rellenar_formulario(ws, data):
                     # Asignar el valor en la celda después del rango fusionado
                     ws.cell(row=cell.row, column=col_final).value = value
 
+                    # Asignar el valor calculado a la celda fusionada F9:G9
+                    if key == "AL":  # Asegúrate de que esto se aplique solo para la clave "AL"
+                        value = calcular_dia_domingo(value)
+                        ws['F9'].value = value  # Asigna el valor a la celda F9
+                        # Si F9 está fusionada, también se actualizará G9
+
                     found = True
                     break
             if found:
@@ -225,17 +231,6 @@ def rellenar_tabla(ws, data):
                                 celda_destino_false = ws[f"{columna_false}{row}"]
                                 celda_principal_false = obtener_celda_principal(ws, celda_destino_false)
                                 celda_principal_false.value = 'X'
-
-                    # Verificar celdas vacías y asignar "N/A"
-                    for dia_key in dias_columna.keys():
-                        columna_true, columna_false = dias_columna[dia_key]
-                        celda_destino_true = ws[f"{columna_true}{row}"]
-                        celda_destino_false = ws[f"{columna_false}{row}"]
-
-                        if celda_destino_true.value is None:
-                            celda_destino_true.value = 'N/A'
-                        if celda_destino_false.value is None:
-                            celda_destino_false.value = 'N/A'
 
                     break
 
