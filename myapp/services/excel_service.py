@@ -150,23 +150,18 @@ def rellenar_formulario(ws, data):
                     ws.cell(row=cell.row, column=col_final).value = value
 
                     # Asignar el valor calculado a la celda fusionada F9:G9
-                    if key == "AL":  # Asegúrate de que esto se aplique solo para la clave "AL"
-                        try:
-                            print(f"Valor original para 'AL': {value}")  # Imprimir el valor original
-                            
+                    if key == "AL":
+                        try:                            
                             # Si value es "Sin fecha", usar el valor de "SEMANA DEL"
                             if value == "Sin fecha":
                                 semana_del = data.get("SEMANA DEL")
                                 if semana_del:
-                                    print(f"Usando 'SEMANA DEL': {semana_del}")  # Imprimir el valor de SEMANA DEL
                                     value_fecha = calcular_dia_domingo(semana_del)
                                 else:
-                                    print("No se encontró valor en 'SEMANA DEL' para calcular el domingo")
                                     value_fecha = None  # Asignar None si no se encuentra SEMANA DEL
                             elif not value or (isinstance(value, str) and not value.strip()):
                                 semana_del = data.get("SEMANA DEL")
                                 if semana_del:
-                                    print(f"Usando 'SEMANA DEL': {semana_del}")  # Imprimir el valor de SEMANA DEL
                                     value_fecha = calcular_dia_domingo(semana_del)
                                 else:
                                     print("No se encontró valor en 'SEMANA DEL' para calcular el domingo")
@@ -174,7 +169,6 @@ def rellenar_formulario(ws, data):
                             else:
                                 value_fecha = calcular_dia_domingo(value)
                             
-                            print(f"Valor calculado para 'AL': {value_fecha}")  # Imprimir el valor calculado
 
                         except Exception as e:
                             print(f"Error al calcular la fecha del domingo: {e}")
@@ -182,7 +176,7 @@ def rellenar_formulario(ws, data):
 
                         if value_fecha is not None:
                             ws['F9'].value = value_fecha  # Asigna el valor a la celda F9
-                            print(f"Valor asignado a F9: {value_fecha}")  # Imprimir el valor asignado
+                            ws['F9'].font = Font(bold=True)  # Aplicar negrita a la celda F9
                         else:
                             print("No se asignó valor a F9 porque value_fecha es None.")
 
