@@ -154,8 +154,16 @@ def rellenar_formulario(ws, data):
                         try:
                             print(f"Valor original para 'AL': {value}")  # Imprimir el valor original
                             
-                            # Si value está vacío o es un string vacío, usar el valor de "SEMANA DEL"
-                            if not value or (isinstance(value, str) and not value.strip()):
+                            # Si value es "Sin fecha", usar el valor de "SEMANA DEL"
+                            if value == "Sin fecha":
+                                semana_del = data.get("SEMANA DEL")
+                                if semana_del:
+                                    print(f"Usando 'SEMANA DEL': {semana_del}")  # Imprimir el valor de SEMANA DEL
+                                    value_fecha = calcular_dia_domingo(semana_del)
+                                else:
+                                    print("No se encontró valor en 'SEMANA DEL' para calcular el domingo")
+                                    value_fecha = None  # Asignar None si no se encuentra SEMANA DEL
+                            elif not value or (isinstance(value, str) and not value.strip()):
                                 semana_del = data.get("SEMANA DEL")
                                 if semana_del:
                                     print(f"Usando 'SEMANA DEL': {semana_del}")  # Imprimir el valor de SEMANA DEL
