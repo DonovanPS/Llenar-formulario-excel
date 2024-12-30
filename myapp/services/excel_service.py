@@ -6,6 +6,7 @@ from openpyxl.drawing.image import Image as XLImage
 from PIL import Image
 import os
 import requests
+from datetime import datetime, timedelta
 
 # Construir la ruta relativa desde el directorio actual de ejecución
 TEMPLATE_PATH = os.path.join(os.getcwd(), 'template', 'PREOPERACIONALES.xlsx')
@@ -107,8 +108,39 @@ def rellenar_formulario(ws, data):
         # Asignar el valor
         celda_principal.value = km_total
 
+    def calcular_dia_domingo(fecha_inicial_str):
+        try:
+            # Agregamos el año actual ya que solo viene día/mes
+            año_actual = datetime.now().year
+            fecha_completa = f"{fecha_inicial_str}/{año_actual}"
+            fecha_inicial = datetime.strptime(fecha_completa, "%d/%m/%Y")
+            
+            # Calculamos días hasta el domingo
+            dias_hasta_domingo = (6 - fecha_inicial.weekday()) % 7
+            fecha_domingo = fecha_inicial + timedelta(days=dias_hasta_domingo)
+            # Retornamos en el mismo formato DD/MM
+            return fecha_domingo.strftime("%d/%m")
+        except Exception as e:
+            print(f"Error procesando la fecha: {e}")
+            return None
+            
     # Iterar sobre los datos del formulario
     for key, value in data.items():
+        # Caso especial para el campo "AL"
+        if key == "AL":
+            try:
+                # Si value está vacío o es un string vacío, usar el valor de "SEMANA DEL"
+                if not value or (isinstance(value, str) and not value.strip()):
+                    semana_del = data.get("SEMANA DEL")
+                    if semana_del:
+                        value = calcular_dia_domingo(semana_del)
+                    else:
+                        print("No se encontró valor en 'SEMANA DEL' para calcular el domingo")
+                else:
+                    value = calcular_dia_domingo(value)
+            except Exception as e:
+                print(f"Error al calcular la fecha del domingo: {e}")
+
         # Normalizar la clave del JSON
         key_normalizado = normalizar_texto(key)
         found = False
