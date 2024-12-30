@@ -126,21 +126,6 @@ def rellenar_formulario(ws, data):
             
     # Iterar sobre los datos del formulario
     for key, value in data.items():
-        # Caso especial para el campo "AL"
-        if key == "AL":
-            try:
-                # Si value está vacío o es un string vacío, usar el valor de "SEMANA DEL"
-                if not value or (isinstance(value, str) and not value.strip()):
-                    semana_del = data.get("SEMANA DEL")
-                    if semana_del:
-                        value = calcular_dia_domingo(semana_del)
-                    else:
-                        print("No se encontró valor en 'SEMANA DEL' para calcular el domingo")
-                else:
-                    value = calcular_dia_domingo(value)
-            except Exception as e:
-                print(f"Error al calcular la fecha del domingo: {e}")
-
         # Normalizar la clave del JSON
         key_normalizado = normalizar_texto(key)
         found = False
@@ -166,9 +151,32 @@ def rellenar_formulario(ws, data):
 
                     # Asignar el valor calculado a la celda fusionada F9:G9
                     if key == "AL":  # Asegúrate de que esto se aplique solo para la clave "AL"
-                        value = calcular_dia_domingo(value)
-                        ws['F9'].value = value  # Asigna el valor a la celda F9
-                        # Si F9 está fusionada, también se actualizará G9
+                        try:
+                            print(f"Valor original para 'AL': {value}")  # Imprimir el valor original
+                            
+                            # Si value está vacío o es un string vacío, usar el valor de "SEMANA DEL"
+                            if not value or (isinstance(value, str) and not value.strip()):
+                                semana_del = data.get("SEMANA DEL")
+                                if semana_del:
+                                    print(f"Usando 'SEMANA DEL': {semana_del}")  # Imprimir el valor de SEMANA DEL
+                                    value_fecha = calcular_dia_domingo(semana_del)
+                                else:
+                                    print("No se encontró valor en 'SEMANA DEL' para calcular el domingo")
+                                    value_fecha = None  # Asignar None si no se encuentra SEMANA DEL
+                            else:
+                                value_fecha = calcular_dia_domingo(value)
+                            
+                            print(f"Valor calculado para 'AL': {value_fecha}")  # Imprimir el valor calculado
+
+                        except Exception as e:
+                            print(f"Error al calcular la fecha del domingo: {e}")
+                            value_fecha = None  # Asignar None en caso de error
+
+                        if value_fecha is not None:
+                            ws['F9'].value = value_fecha  # Asigna el valor a la celda F9
+                            print(f"Valor asignado a F9: {value_fecha}")  # Imprimir el valor asignado
+                        else:
+                            print("No se asignó valor a F9 porque value_fecha es None.")
 
                     found = True
                     break
