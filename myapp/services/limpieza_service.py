@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 import io
 import os
 from PIL import Image
@@ -23,25 +22,6 @@ def validar_datos_inspeccion(inspeccion_data):
                 return False
     
     return True
-
-def calcular_dia_domingo(fecha_inicial_str):
-    try:
-        # Solo tomamos la parte de la fecha (días y meses)
-        fecha_str = fecha_inicial_str.split()[0]  # Toma solo la parte de la fecha
-        # Agregamos el año actual ya que solo viene día/mes
-        año_actual = datetime.now().year
-        fecha_completa = f"{fecha_str}/{año_actual}"  # Formato: DD/MM/AÑO
-        fecha_inicial = datetime.strptime(fecha_completa, "%d/%m/%Y")  # Ajusta el formato
-        
-        # Calculamos días hasta el domingo
-        dias_hasta_domingo = (6 - fecha_inicial.weekday()) % 7
-        fecha_domingo = fecha_inicial + timedelta(days=dias_hasta_domingo)
-        # Retornamos en el mismo formato DD/MM
-        return fecha_domingo.strftime("%d/%m")
-    except Exception as e:
-        print(f"Error procesando la fecha: {e}")
-        return None
-    
 
 def procesar_excel_dinamico(data):
     """
@@ -72,7 +52,6 @@ def procesar_excel_dinamico(data):
         )
     }
 
-
     def obtener_celda_principal(hoja, celda):
         """Obtiene la celda principal si está en un rango fusionado"""
         for merged_range in hoja.merged_cells.ranges:
@@ -81,10 +60,12 @@ def procesar_excel_dinamico(data):
         return celda
     
     print(f"Datos recibidos: {data}")
+    print(f"Datos recibidos - FIRMAS_RELV: {data['IMAGENES']['FIRMAS_RELV']}")
 
     if 'FORMULARIO' in data:
         formulario = data['FORMULARIO']
         campos_formulario = {
+            'FECHA': 'E6',
             'AÑO': 'I6',
             'PLACA': 'T7'
         }
@@ -95,19 +76,6 @@ def procesar_excel_dinamico(data):
                 cell.value = formulario[campo]
                 cell.font = estilo_formulario['font']
                 cell.alignment = estilo_formulario['alignment']
-        if 'FECHA' in formulario:
-            # Extraer solo la fecha sin la hora
-            fecha_str = formulario['FECHA'].split()[0]
-            # Asignar la fecha original a E6
-            worksheet['E6'].value = fecha_str
-            worksheet['E6'].font = estilo_formulario['font']
-            worksheet['E6'].alignment = estilo_formulario['alignment']
-
-            # Calcular y asignar el domingo a G6
-            fecha_domingo = calcular_dia_domingo(formulario['FECHA'])
-            worksheet['G6'].value = fecha_domingo
-            worksheet['G6'].font = estilo_formulario['font']
-            worksheet['G6'].alignment = estilo_formulario['alignment']
 
     inspeccion = data.get("INSPECCION", {})
     fila_inicial = 11
