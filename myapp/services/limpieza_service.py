@@ -64,7 +64,7 @@ def procesar_excel_dinamico(data):
     if 'FORMULARIO' in data:
         formulario = data['FORMULARIO']
         campos_formulario = {
-            'FECHA': 'F6',
+            'FECHA': 'E6',
             'AÑO': 'I6',
             'PLACA': 'T7'
         }
