@@ -76,6 +76,12 @@ def procesar_excel_dinamico(data):
                 # Si el campo es FECHA, solo tomar la parte de día/mes
                 if campo == 'FECHA':
                     cell.value = formulario[campo].split()[0]  # Solo toma DD/MM
+                elif campo == 'AÑO':
+                    # Obtener el año actual y convertirlo a string
+                    año_actual = str(datetime.now().year)
+                    # Tomar solo los últimos dos dígitos
+                    año_dos_digitos = año_actual[-2:]
+                    cell.value = año_dos_digitos
                 else:
                     cell.value = formulario[campo]  # Para los demás campos, toma el valor completo
                 
