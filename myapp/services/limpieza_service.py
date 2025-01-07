@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import io
 import os
 from PIL import Image
@@ -80,6 +81,29 @@ def procesar_excel_dinamico(data):
                 
                 cell.font = estilo_formulario['font']
                 cell.alignment = estilo_formulario['alignment']
+        def calcular_dia_domingo(fecha_inicial_str):
+            try:
+                # Separar la fecha y la hora
+                fecha_str, hora_str = fecha_inicial_str.split()  # Separa en fecha y hora
+                # Agregamos el año actual ya que solo viene día/mes
+                año_actual = datetime.now().year
+                fecha_completa = f"{fecha_str}/{año_actual} {hora_str}"  # Incluye la hora
+                fecha_inicial = datetime.strptime(fecha_completa, "%d/%m %Y %H:%M")  # Ajusta el formato
+                
+                # Calculamos días hasta el domingo
+                dias_hasta_domingo = (6 - fecha_inicial.weekday()) % 7
+                fecha_domingo = fecha_inicial + timedelta(days=dias_hasta_domingo)
+                # Retornamos en el mismo formato DD/MM
+                return fecha_domingo.strftime("%d/%m")
+            except Exception as e:
+                print(f"Error procesando la fecha: {e}")
+                return None
+        
+        fecha_domingo = calcular_dia_domingo(formulario['FECHA'])
+        worksheet['G6'].value = fecha_domingo
+        cell.font = estilo_formulario['font']
+        cell.alignment = estilo_formulario['alignment']
+
 
     inspeccion = data.get("INSPECCION", {})
     fila_inicial = 11
