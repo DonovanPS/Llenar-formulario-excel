@@ -72,7 +72,12 @@ def procesar_excel_dinamico(data):
         for campo, celda in campos_formulario.items():
             if campo in formulario:
                 cell = worksheet[celda]
-                cell.value = formulario[campo]
+                # Si el campo es FECHA, solo tomar la parte de día/mes
+                if campo == 'FECHA':
+                    cell.value = formulario[campo].split()[0]  # Solo toma DD/MM
+                else:
+                    cell.value = formulario[campo]  # Para los demás campos, toma el valor completo
+                
                 cell.font = estilo_formulario['font']
                 cell.alignment = estilo_formulario['alignment']
 
