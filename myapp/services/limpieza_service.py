@@ -85,10 +85,13 @@ def procesar_excel_dinamico(data):
             try:
                 # Separar la fecha y la hora
                 fecha_str, hora_str = fecha_inicial_str.split()  # Separa en fecha y hora
+                
                 # Agregamos el año actual ya que solo viene día/mes
                 año_actual = datetime.now().year
-                fecha_completa = f"{fecha_str}/{año_actual} {hora_str}"  # Incluye la hora
-                fecha_inicial = datetime.strptime(fecha_inicial_str, "%d/%m/%Y %H:%M")
+                fecha_completa = f"{fecha_str}/{año_actual} {hora_str}"
+                
+                # Usar el formato correcto para parsear la fecha
+                fecha_inicial = datetime.strptime(fecha_completa, "%d/%m/%Y %H:%M")
                 
                 # Calculamos días hasta el domingo
                 dias_hasta_domingo = (6 - fecha_inicial.weekday()) % 7
