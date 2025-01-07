@@ -58,6 +58,8 @@ def procesar_excel_dinamico(data):
             if celda.coordinate in merged_range:
                 return hoja.cell(merged_range.min_row, merged_range.min_col)
         return celda
+    
+    print(f"Datos recibidos: {data}")
 
     if 'FORMULARIO' in data:
         formulario = data['FORMULARIO']
