@@ -65,17 +65,9 @@ def rellenar_formulario(ws, data):
     fecha_emision = data.pop("Fecha de Emision", None)
     km_total = data.pop("KM TOTAL", None)
 
-    # Obtener el año actual y convertirlo a string
-    año_actual = str(datetime.now().year)
-    # Tomar solo los últimos dos dígitos
-    año_dos_digitos = año_actual[-2:]
-
     # Función para limpiar y normalizar el texto
     def normalizar_texto(texto):
         if isinstance(texto, str):  # Verifica si es una cadena de texto
-            # Si el texto contiene "DEL 20", reemplazar con el año actual
-            if "DEL 20" in texto:
-                return texto.replace("20", año_dos_digitos)
             return texto.strip().lower().rstrip(':')
         return str(texto)  # Convierte otros tipos de datos a string
 
@@ -184,7 +176,7 @@ def rellenar_formulario(ws, data):
 
                         if value_fecha is not None:
                             ws['F9'].value = value_fecha  # Asigna el valor a la celda F9
-                            ws['F9'].font = Font(bold=True)  # Aplicar negrita a la celda F9
+                            ws['F9'].font = Font(name='Arial', size=12, bold=True)  # Aplicar Arial 12 negrita a la celda F9
                         else:
                             print("No se asignó valor a F9 porque value_fecha es None.")
 
