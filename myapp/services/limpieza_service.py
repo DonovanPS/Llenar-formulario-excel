@@ -104,8 +104,8 @@ def procesar_excel_dinamico(data):
         
         fecha_domingo = calcular_dia_domingo(formulario['FECHA'])
         worksheet['G6'].value = fecha_domingo
-        cell.font = estilo_formulario['font']
-        cell.alignment = estilo_formulario['alignment']
+        worksheet['G6'].font = estilo_formulario['font']
+        worksheet['G6'].alignment = estilo_formulario['alignment']
 
 
     inspeccion = data.get("INSPECCION", {})
