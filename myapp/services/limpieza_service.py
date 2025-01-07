@@ -141,7 +141,7 @@ def procesar_excel_dinamico(data):
     return excel_buffer
 
 def insertar_imagenes(ws, imagenes_data):
-    """Inserta las im��genes en el Excel"""
+    """Inserta las imágenes en el Excel"""
     celdas_imagenes = {
         'LOGO': 'B2',
         'FIRMA_USER': 'B25'
@@ -193,21 +193,16 @@ def insertar_imagenes(ws, imagenes_data):
             uid_modificador = modified_by.get(dia)
             print(f"UID del modificador para {dia}: {uid_modificador}")
             
-            if uid_modificador:
-                firma_key = f'FIRMA_USER_{uid_modificador}'
-                print(f"Buscando firma con key: {firma_key}")
-                print(f"Firmas disponibles: {firmas_relevantes.keys()}")
+            if uid_modificador and uid_modificador in firmas_relevantes:
+                firma_url = firmas_relevantes[uid_modificador]
+                print(f"Insertando firma en celda {celda_firma}")
+                print(f"URL de la firma: {firma_url}")
                 
-                if firma_key in firmas_relevantes:
-                    firma_a_usar = firmas_relevantes[firma_key]
-                    print(f"Insertando firma en celda {celda_firma}")
-                    print(f"URL de la firma: {firma_a_usar}")
-                    
-                    insertar_imagen_en_celda(ws, firma_a_usar,
-                                           celda_firma,
-                                           tamanos_fijos['FIRMA_USER'])
-                else:
-                    print(f"No se encontró la firma para la key: {firma_key}")
+                insertar_imagen_en_celda(ws, firma_url,
+                                       celda_firma,
+                                       tamanos_fijos['FIRMA_USER'])
+            else:
+                print(f"No se encontró la firma para el UID: {uid_modificador}")
 
 def insertar_imagen_en_celda(ws, url, celda, tamano):
     """Inserta una imagen en una celda específica"""
