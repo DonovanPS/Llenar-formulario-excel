@@ -60,12 +60,11 @@ def procesar_excel_dinamico(data):
         return celda
     
     print(f"Datos recibidos: {data}")
-    print(f"Datos recibidos - FIRMAS_RELV: {data['IMAGENES']['FIRMAS_RELV']}")
 
     if 'FORMULARIO' in data:
         formulario = data['FORMULARIO']
         campos_formulario = {
-            'FECHA': 'E6',
+            'FECHA': 'F6',
             'AÑO': 'I6',
             'PLACA': 'T7'
         }
