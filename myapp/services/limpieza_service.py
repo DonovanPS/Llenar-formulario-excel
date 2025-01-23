@@ -24,7 +24,7 @@ def validar_datos_inspeccion(inspeccion_data):
     
     return True
 
-def procesar_excel_dinamico(data):
+def procesar_excel_dinamico(data, demo: bool = False):
     """
     Procesa la plantilla Excel y llena las celdas según la data recibida.
     """
@@ -141,7 +141,7 @@ def procesar_excel_dinamico(data):
                 print(f"Error procesando día {dia}: {str(e)}")
 
     if 'IMAGENES' in data:
-        insertar_imagenes(worksheet, data['IMAGENES'])
+        insertar_imagenes(worksheet, data['IMAGENES'], demo)
 
     excel_buffer = io.BytesIO()
     wb.save(excel_buffer)
@@ -149,7 +149,7 @@ def procesar_excel_dinamico(data):
 
     return excel_buffer
 
-def insertar_imagenes(ws, imagenes_data):
+def insertar_imagenes(ws, imagenes_data, demo: bool = False):
     """Inserta las imágenes en el Excel"""
     celdas_imagenes = {
         'LOGO': 'B2',
@@ -185,10 +185,12 @@ def insertar_imagenes(ws, imagenes_data):
                     return True
         return False
 
-    if 'LOGO' in imagenes_data:
-        insertar_imagen_en_celda(ws, imagenes_data['LOGO'], 
-                               celdas_imagenes['LOGO'], 
-                               tamanos_fijos['LOGO'])
+    if not demo:
+        if 'LOGO' in imagenes_data:
+            insertar_imagen_en_celda(ws, imagenes_data['LOGO'], 
+                                   celdas_imagenes['LOGO'], 
+                                   tamanos_fijos['LOGO'])
+    
 
     for dia, (col_inicio, col_fin) in grupos_firma_user.items():
         print(f"\n=== Procesando firma para {dia} ===")
@@ -213,7 +215,7 @@ def insertar_imagenes(ws, imagenes_data):
             else:
                 print(f"No se encontró la firma para el UID: {uid_modificador}")
 
-def insertar_imagen_en_celda(ws, url, celda, tamano):
+def insertar_imagen_en_celda(ws, url, celda, tamano,):
     """Inserta una imagen en una celda específica"""
     try:
         response = requests.get(url)

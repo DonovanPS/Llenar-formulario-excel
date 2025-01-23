@@ -6,20 +6,20 @@ from myapp.services.salud_service import procesar_excel_salud
 
 OUTPUT_PATH = os.path.join(os.getcwd(), 'plantilla_modificada.xlsx')
 
-def rellenar_excel(request):
+def rellenar_excel(request, demo: bool = False):
     data = request.json
     try:
-        procesar_excel(data)
+        procesar_excel(data, demo)
         return send_file(OUTPUT_PATH, as_attachment=True, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     except FileNotFoundError:
         return "El archivo de plantilla de Excel no se encontró. Verifique la ruta. controller", 404
     except Exception as e:
         return str(e), 500
     
-def rellenar_excel_limpieza(request):
+def rellenar_excel_limpieza(request, demo: bool = False):
     data = request.json
     try:
-        excel_buffer = procesar_excel_dinamico(data)
+        excel_buffer = procesar_excel_dinamico(data, demo)
         return send_file(
             excel_buffer,
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -32,10 +32,10 @@ def rellenar_excel_limpieza(request):
         return str(e), 500
     
    
-def rellenar_excel_salud(request):
+def rellenar_excel_salud(request, demo: bool = False):
     data = request.json
     try:
-        excel_buffer = procesar_excel_salud(data)
+        excel_buffer = procesar_excel_salud(data, demo)
         return send_file(
             excel_buffer,
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

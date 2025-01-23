@@ -13,7 +13,7 @@ TEMPLATE_PATH = os.path.join(os.getcwd(), 'template', 'PREOPERACIONALES.xlsx')
 OUTPUT_PATH = os.path.join(os.getcwd(), 'plantilla_modificada.xlsx')
 
 
-def procesar_excel(data):
+def procesar_excel(data, demo: bool = False):
     # Verifica que el archivo de plantilla existe
     if not os.path.exists(TEMPLATE_PATH):
         print(f"ERROR: No se encontró el archivo de plantilla en {TEMPLATE_PATH}")
@@ -43,7 +43,7 @@ def procesar_excel(data):
     rellenar_tabla(ws, data)
     
     if imagenes_data:
-        insertar_imagenes(ws, imagenes_data, pie_tabla)
+        insertar_imagenes(ws, imagenes_data, pie_tabla, demo)
 
     
 
@@ -313,7 +313,7 @@ def rellenar_pie_tabla(ws, data):
         if not found:
             print("No se encontró una celda para 'OBSERVACIONES'.")
 
-def insertar_imagenes(ws, imagenes_data, pie_tabla):
+def insertar_imagenes(ws, imagenes_data, pie_tabla, demo: bool = False):
     celdas_imagenes = {
         'LOGO': 'A1',
         'FIRMA_USER': 'B84',
@@ -362,6 +362,10 @@ def insertar_imagenes(ws, imagenes_data, pie_tabla):
 
     for tipo_imagen, url in imagenes_data.items():
         if url:
+            # Si es el LOGO y estamos en modo demo, lo saltamos
+            if tipo_imagen == 'LOGO' and demo:
+                continue
+                
             if tipo_imagen in celdas_imagenes:
                 celda = celdas_imagenes[tipo_imagen]
                 insertar_imagen_en_celda(ws, url, celda, tamanos_fijos[tipo_imagen])

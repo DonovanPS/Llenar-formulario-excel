@@ -19,7 +19,7 @@ def get_template_path():
     print(f"Template path: {template_path}")
     return template_path
 
-def procesar_excel_salud(data):
+def procesar_excel_salud(data, demo: bool = False):
     """
     Procesa la plantilla Excel y llena las celdas según la data recibida.
     """
@@ -132,7 +132,7 @@ def procesar_excel_salud(data):
     # Procesar imágenes si existen
     if 'IMAGENES' in data:
         try:
-            insertar_imagenes_salud(worksheet, data['IMAGENES'])
+            insertar_imagenes_salud(worksheet, data['IMAGENES'], demo)
         except Exception as e:
             logger.error(f"Error al insertar imágenes: {e}")
 
@@ -147,7 +147,7 @@ def procesar_excel_salud(data):
 
     return excel_buffer
 
-def insertar_imagenes_salud(ws, imagenes_data):
+def insertar_imagenes_salud(ws, imagenes_data, demo: bool = False):
     """Inserta las imágenes en el Excel"""
     # Configuración de celdas fijas
     celdas_imagenes = {
@@ -185,12 +185,12 @@ def insertar_imagenes_salud(ws, imagenes_data):
         return False
 
 
-    # Insertar logo si existe
-    if 'LOGO' in imagenes_data:
-        insertar_imagen_en_celda(ws, imagenes_data['LOGO'], 
-                               celdas_imagenes['LOGO'], 
-                               tamanos_fijos['LOGO'])
-        print("Logo insertado.")
+    if not demo:
+        if 'LOGO' in imagenes_data:
+            insertar_imagen_en_celda(ws, imagenes_data['LOGO'], 
+                                celdas_imagenes['LOGO'], 
+                                tamanos_fijos['LOGO'])
+            print("Logo insertado.")
 
     # Insertar imagen de TRANS si existe
     # Insertar firma de usuario donde corresponda
