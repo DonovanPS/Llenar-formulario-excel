@@ -246,41 +246,7 @@ def rellenar_tabla(ws, data):
 
 
 def rellenar_pie_tabla(ws, data):
-    nombre_conductor = data.pop("Nombre del Conductor", None)
     observaciones = data.pop("OBSERVACIONES", None)
-
-    # Llenar el nombre del conductor en la celda anterior
-    if nombre_conductor:
-        found = False
-        for row in ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
-            for cell in row:
-                # Normalizar el valor de la celda
-                if cell.value and "nombre del conductor" in str(cell.value).strip().lower():
-                    # Obtener el rango fusionado y la celda principal
-                    rango_fusionado, celda_principal = obtener_rango_fusionado(ws, cell)
-
-                    if rango_fusionado:
-                        # Determinar la celda antes del rango fusionado
-                        col_anterior = rango_fusionado.min_col - 1
-
-                        if col_anterior >= 1:
-                            celda_destino = ws.cell(row=cell.row, column=col_anterior)
-                            celda_principal_destino = obtener_rango_fusionado(ws, celda_destino)[1]
-                            celda_principal_destino.value = nombre_conductor
-
-                    else:
-                        # Si no está fusionada, simplemente toma la celda anterior
-                        col_anterior = cell.column - 1
-                        if col_anterior >= 1:
-                            ws.cell(row=cell.row, column=col_anterior).value = nombre_conductor
-
-                    found = True
-                    break
-            if found:
-                break
-        if not found:
-            print("No se encontró una celda para 'Nombre del Conductor'.")
-
     # Llenar las observaciones en la celda debajo de la identificada
     if observaciones:
         found = False
