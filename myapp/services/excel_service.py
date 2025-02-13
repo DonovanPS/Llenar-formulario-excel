@@ -233,14 +233,26 @@ def rellenar_tabla(ws, data):
                         dia_key = dia.strip().capitalize()
                         if dia_key in dias_columna:
                             columna_true, columna_false = dias_columna[dia_key]
-                            if valor == True:
+                            if valor == 'good':
                                 celda_destino_true = ws[f"{columna_true}{row}"]
                                 celda_principal_true = obtener_celda_principal(ws, celda_destino_true)
                                 celda_principal_true.value = 'X'
-                            elif valor == False:
+                            elif valor == 'bad':
                                 celda_destino_false = ws[f"{columna_false}{row}"]
                                 celda_principal_false = obtener_celda_principal(ws, celda_destino_false)
                                 celda_principal_false.value = 'X'
+                            elif valor == 'na':
+                                # Marcar N/A en ambas celdas
+                                celda_destino_true = ws[f"{columna_true}{row}"]
+                                celda_principal_true = obtener_celda_principal(ws, celda_destino_true)
+                                celda_principal_true.value = 'N/A'
+                                
+                                celda_destino_false = ws[f"{columna_false}{row}"]
+                                celda_principal_false = obtener_celda_principal(ws, celda_destino_false)
+                                celda_principal_false.value = 'N/A'
+                            elif valor == 'null':
+                                # No hacer nada, dejar las celdas vacías
+                                pass
 
                     break
 
